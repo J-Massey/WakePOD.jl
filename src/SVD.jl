@@ -165,9 +165,10 @@ Incorporates new data into the existing data matrix using singular value decompo
 """
 
 function rincorporate(A, U, k)
-    (m,n)=size(A)
+    Ai = hcat(U, A)
+    (m,n)=size(Ai)
     Phi=rand(n,k)
-    Yr=A*Phi
+    Yr=Ai*Phi
     Qi,Ri = qr!(Yr)
     Bi=transpose(Matrix(Qi))*A
     Ûi,Σi,Vti = svd!(Bi)
