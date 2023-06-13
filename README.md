@@ -1,4 +1,4 @@
-# WakePOD.jl
+# WakeStab.jl
 
 A package to compute the spatial and temporal dynamics of the wake to use in the stability analysis.
 
