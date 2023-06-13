@@ -38,7 +38,6 @@ function curl(u, v, dx, dy)
     
     return ∂v_∂x - ∂u_∂y
 end
-
 # Calculate vorticity snapshots
 vorticity_snapshots = zeros(size(wake_snapshots_u))
 
@@ -106,52 +105,43 @@ flat_vorticity_snapshots = reshape(
 k=20
 U, Σ, Vk = rSVD(flat_vorticity_snapshots, k)
 
-# for m in 1:k
-#     f = Figure(resolution = (1600, 400))
-#     ax = Axis(f[1, 1])
-#     ϕ = reshape(U[:, m], nx, ny)
-#     println(minimum(ϕ), " ", maximum(ϕ))
-#     co = contourf!(ax,
-#         pxs, pys, reshape(U[:, m], nx, ny),
-#         xlabel=L"x", ylabel=L"y", title=L"ϕ_$m",
-#         levels = range(-0.01, 0.01, length = 44),
-#         # colormap=:plasma,
-#         extendlow = :auto, extendhigh = :auto,
-#     )
-#     tightlimits!(ax)
-#     save("figures/modes/U_$m.png", f)
-# end
+for m in 1:k
+    f = Figure(resolution = (1600, 400))
+    ax = Axis(f[1, 1])
+    ϕ = reshape(U[:, m], nx, ny)
+    println(minimum(ϕ), " ", maximum(ϕ))
+    co = contourf!(ax,
+        pxs, pys, reshape(U[:, m], nx, ny),
+        xlabel=L"x", ylabel=L"y", title=L"ϕ_$m",
+        levels = range(-0.01, 0.01, length = 44),
+        # colormap=:plasma,
+        extendlow = :auto, extendhigh = :auto,
+    )
+    tightlimits!(ax)
+    save("figures/modes/U_$m.png", f)
+end
 
 A = diagm(Σ[1:k]) * Vk
+M1 = U[:,1:1] * A[1:1, :]
 
-using FileIO
-using ImageMagick
-
-# Loop over each mode
+# Animate the modes
 for m in 1:k
-    # Create an array to store frames for the GIF
     Mk = U[:,m:m] * A[m:m, :]
-    frames = []
-
-    # Loop over each time step
     for t in 1:nt
-        Mpl = reshape(Mk[:, t], nx, ny)
-        fig = Figure(resolution = (1600, 400))
-        ax = Axis(fig[1, 1])
-        lines = contourf!(ax, pxs, pys, Mpl,
+        f = Figure(resolution = (1600, 400))
+        ax = Axis(f[1, 1])
+        co = contourf!(ax,
+            pxs, pys, reshape(Mk[:, t], nx, ny),
+            xlabel=L"x", ylabel=L"y", title=L"ϕ_1(t)",
             levels = range(-0.01, 0.01, length = 44),
-            colormap = :seismic,
-            extend = :both,
+            colormap=:seismic,
+            extendlow = :auto, extendhigh = :auto,
         )
-        xlabel!(ax, "x")
-        ylabel!(ax, "y")
-        title!(ax, "ϕ_$(m)(t)")
         tightlimits!(ax)
-
-        # Push the current frame to the frames array
-        push!(frames, frame(fig))
+        save("figures/time/M_$t.png", f)
     end
-
-    # Save the frames as a GIF
-    save(string("figures/time/mode_", m, ".gif"), frames, fps = 10)
 end
+
+# Now lets get the DMD
+Phi = U * sqrt(Σ) * Vk'  # DMD modes
+Lambda = sqrt(Σ) * Vk'   # Temporal dynamics
