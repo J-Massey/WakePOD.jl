@@ -138,10 +138,10 @@ for m in 1:k
             extendlow = :auto, extendhigh = :auto,
         )
         tightlimits!(ax)
-        save("figures/time/M_$t.png", f)
+        save("figures/time/M$m_$t.png", f)
     end
 end
 
-# Now lets get the DMD
+# # Now lets get the DMD
 Phi = U * sqrt(Σ) * Vk'  # DMD modes
 Lambda = sqrt(Σ) * Vk'   # Temporal dynamics
