@@ -21,40 +21,26 @@ pys = np.linspace(*ylims, ny)
 # Flatten snapshots along first two dimensions
 flat_vort = vort.reshape(nx * ny, nt)
 
-def rSVD(A, k):
-    m, n = A.shape
-    Φ = np.random.rand(n, k)
-    Ar = A @ Φ
-    Q, _ = qr(Ar, mode='economic')
-    B = Q.T @ A
-    U, S, Vt = svd(B, full_matrices=False)
-    max_idx = np.argsort(S)[::-1][:k]
-    Sk = S[max_idx]
-    Uk = U[:, max_idx]
-    Vk = Vt[max_idx, :]
-    U = Q @ Uk
-    return U, Sk, Vk
+U, S, Vt = svd(flat_vort, full_matrices=False)
+
+fig, ax = plt.subplots(figsize=(3, 3))
+ax.plot(S / S.sum(), "o", ms=2)
+ax.set_xlabel("Mode number")
+ax.set_ylabel("Energy fraction")
+ax.set_yscale("log")
+plt.savefig("figures/wakePOD_energy.pdf", bbox_inches="tight")
 
 
-k = 20
-U, S, Vk = rSVD(flat_vort, k)
 
-np.save("U_POD.npy", U)
-np.save("S_POD.npy", S)
-np.save("Vk_POD.npy", Vk)
-
-
-for m in range(k):
+for m in range(0,10):
     fig, ax = plt.subplots(figsize=(5, 3))
-    lim = [-.005, .005]
+    lim = [-.0075, .0075]
     levels = np.linspace(lim[0], lim[1], 44)
     _cmap = sns.color_palette("seismic", as_cmap=True)
-    phi = U[:, m].reshape(nx, ny)
-    print(np.min(phi), np.max(phi))
-    co = ax.contourf(
+    cs = ax.contourf(
         pxs,
         pys,
-        phi.T,
+        U[:,m].reshape(nx, ny).T,
         levels=levels,
         vmin=lim[0],
         vmax=lim[1],
@@ -63,33 +49,27 @@ for m in range(k):
         extend="both",
     )
     ax.set_aspect(1)
-    ax.set(xlabel=r"$x$", ylabel=r"$y$", title=r"$\phi_{" + str(m) + r"}$")
-    # fig.colorbar(co)
-    plt.tight_layout()
-    fig.savefig("figures/modes/U_{}.png".format(m))
+    plt.savefig(f"./figures/modes/U_{m}.png", dpi=600)
+    plt.close()
 
-# A = np.diag(S[:k]) @ Vk[:k, :]
-# M1 = U[:, :1] @ A[:1, :]
 
-# # Animate the modes
-# for m in range(k):
-#     Mk = U[:, m:m+1] @ A[m:m+1, :]
-#     for t in range(nt):
-#         fig = plt.figure(figsize=(16, 4))
-#         ax = fig.add_subplot(1, 1, 1)
-#         co = ax.contourf(
-#             pxs, pys, Mk[:, t].reshape(nx, ny),
-#             levels=np.linspace(-0.01, 0.01, num=44),
-#             cmap='seismic',
-#             extend='both'
-#         )
-#         ax.set(xlabel=r"$x$", ylabel=r"$y$", title=r"$\phi_1(t)$")
-#         fig.colorbar(co)
-#         plt.tight_layout()
-#         fig.savefig("figures/time/M{}_{}.png".format(m, t))
-
-# # # Now let's get the DMD
-# Phi = U @ np.sqrt(np.diag(S)) @ Vk  # DMD modes
-# print(Phi.shape)
-# Lambda = np.sqrt(np.diag(S)) @ Vk  # Temporal dynamics
-# print(vort.shape)
+print(Vt)
+for m in range(0,10):
+    fig, ax = plt.subplots(figsize=(5, 3))
+    lim = [-.0075, .0075]
+    levels = np.linspace(lim[0], lim[1], 44)
+    _cmap = sns.color_palette("seismic", as_cmap=True)
+    cs = ax.contourf(
+        pxs,
+        pys,
+        U[:,m].reshape(nx, ny).T,
+        levels=levels,
+        vmin=lim[0],
+        vmax=lim[1],
+        # norm=norm,
+        cmap=_cmap,
+        extend="both",
+    )
+    ax.set_aspect(1)
+    plt.savefig(f"./figures/modes/U_{m}.png", dpi=600)
+    plt.close()
