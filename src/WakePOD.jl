@@ -1,6 +1,6 @@
 include("SVD.jl")
 using NPZ
-using GLMakie
+using CairoMakie
 using LinearAlgebra
 using Statistics
 
@@ -10,6 +10,8 @@ flow_snapshots_u = npzread("data/u.npy")
 flow_snapshots_u = permutedims(flow_snapshots_u, [3, 2, 1])
 flow_snapshots_v = npzread("data/v.npy")
 flow_snapshots_v = permutedims(flow_snapshots_v, [3, 2, 1])
+
+println("Loaded snaps")
 # Just the wake
 nx, ny, nt = size(flow_snapshots_u)
 dt = 8/nt
@@ -47,6 +49,8 @@ dy = mean(pys[2:end] - pys[1:end-1])
 for t in 1:nt
     vorticity_snapshots[:, :, t] = curl(wake_snapshots_u[:, :, t], wake_snapshots_v[:, :, t], dx, dy)
 end
+
+npzwrite("data/vortwake.npz", vorticity_snapshots)
 
 function testplotvort()
     # Quick test plot
