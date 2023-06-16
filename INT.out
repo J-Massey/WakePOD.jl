@@ -1,7 +1,7 @@
 Running SLURM prolog script on ruby049.cluster.local
 ===============================================================================
-Job started on Thu Jun 15 09:57:15 BST 2023
-Job ID          : 3857819
+Job started on Fri Jun 16 09:44:16 BST 2023
+Job ID          : 3864824
 Job name        : interactive
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
@@ -12,26 +12,5 @@ Num of tasks    : 64
 Hosts allocated : ruby049
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Thu Jun 15 09:57:15 BST 2023
+Starting calculation at Fri Jun 16 09:44:16 BST 2023
 ---------------------------------------------------------------
-slurmstepd-ruby049: error: *** JOB 3857819 ON ruby049 CANCELLED AT 2023-06-15T17:16:25 ***
-==============================================================================
-Running epilogue script on ruby049.
-
-Submit time  : 2023-06-15T09:48:16
-Start time   : 2023-06-15T09:57:14
-End time     : 2023-06-15T17:16:25
-Elapsed time : 07:19:11 (Timelimit=11:00:00)
-
-Job ID: 3857819
-Cluster: i5
-User/Group: jmom1n15/mm
-State: CANCELLED (exit code 0)
-Nodes: 1
-Cores per node: 64
-CPU Utilized: 1-14:12:59
-CPU Efficiency: 8.16% of 19-12:27:44 core-walltime
-Job Wall-clock time: 07:19:11
-Memory Utilized: 218.45 GB
-Memory Efficiency: 97.09% of 225.00 GB
-
