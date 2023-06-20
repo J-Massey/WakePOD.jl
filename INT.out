@@ -1,7 +1,7 @@
-Running SLURM prolog script on ruby049.cluster.local
+Running SLURM prolog script on ruby055.cluster.local
 ===============================================================================
-Job started on Fri Jun 16 09:44:16 BST 2023
-Job ID          : 3864824
+Job started on Tue Jun 20 08:58:14 BST 2023
+Job ID          : 3879571
 Job name        : interactive
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
@@ -9,8 +9,8 @@ Partition       : amd
 Num hosts       : 1
 Num cores       : 64
 Num of tasks    : 64
-Hosts allocated : ruby049
+Hosts allocated : ruby055
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Fri Jun 16 09:44:16 BST 2023
+Starting calculation at Tue Jun 20 08:58:14 BST 2023
 ---------------------------------------------------------------

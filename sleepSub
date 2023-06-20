@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --partition=amd
 #SBATCH --job-name=interactive
-#SBATCH --time=11:00:00
+#SBATCH --time=14:00:00
 #SBATCH --output=INT.out
 #SBATCH --exclusive
 # SBATCH --exclude=ruby035,ruby036,ruby037

@@ -7,7 +7,7 @@ plt.rcParams["font.size"] = "10.5"
 
 def Sigma_plot(Sigma):
     fig, ax = plt.subplots(figsize=(3, 3))
-    ax.plot(Sigma / Sigma.sum(), "o", ms=2)
+    ax.plot(Sigma / Sigma.sum(), "o", markerfacecolor="none", ms=1, c='k', alpha=0.8)
     ax.set_xlabel("Mode number")
     ax.set_ylabel(r"$ \Sigma $")
     ax.set_yscale("log")
@@ -20,7 +20,7 @@ def lambdaPlot(Lambda):
     fig, ax = plt.subplots(figsize=(3, 3))
     # theta = np.linspace(0,1,200)*2*np.pi
     # ax.plot(np.cos(theta)/2, np.sin(theta)/2, c='grey')
-    ax.plot(np.diag(Lambda).real, np.diag(Lambda).imag, "P", markerfacecolor="none", ms=4, c='k', alpha=0.8)
+    ax.plot(np.diag(Lambda).real, np.diag(Lambda).imag, "o", markerfacecolor="none", ms=1, c='k', alpha=0.8)
     ax.set_xlabel(r"$\Re(\lambda)$")
     ax.set_ylabel(r"$\Im(\lambda)$")
     plt.savefig("figures/lambda.pdf", bbox_inches="tight")
@@ -44,9 +44,9 @@ def bPlot(b):
     fig, ax = plt.subplots(figsize=(3, 3))
     # theta = np.linspace(0,1,200)*2*np.pi
     # ax.plot(np.cos(theta)/2, np.sin(theta)/2, c='grey')
-    ax.plot(b, "X", markerfacecolor="none", ms=4, c='k', alpha=0.8)
-    # ax.set_xlabel(r"$\Re(\lambda)$")
-    # ax.set_ylabel(r"$\Im(\lambda)$")
+    ax.plot(b, "o", markerfacecolor="none", ms=1, c='k', alpha=0.8)
+    ax.set_xlabel(r"$n$")
+    ax.set_ylabel(r"$b$")
     plt.savefig("figures/ModeAmplitudes.pdf", bbox_inches="tight")
     plt.close()
 
@@ -66,8 +66,9 @@ pys = np.linspace(*ylims, ny)
 
 
 # Flatten snapshots along first two dimensions
-vort1 = vort.reshape(nx * ny, nt)
-vort2 = vort2.reshape(nx * ny, nt)
+flucs = np.load("data/fluctuations.npy")
+vort1 = flucs[:, :1]
+vort2 = flucs[:, :-1]
 
 k = 200
 # def DMD(X,Xprime,r):
@@ -93,54 +94,36 @@ lambdaPlot(Lambda)
 omega = np.log(Lambda)/dt  # Spectral expansion
 omegaPlot(omega)
 
-# Now sort everything based on the real part of the spectral expansion
-p = np.argsort(omega.imag)
-Atildes = Atilde[p]
-Sigmars = Sigmar[p]
-Ws = W[p]
-VTrs = VTr[p]
-Lambdas = Lambda[p]
-
 
 Phi = vort2 @ np.linalg.solve(Sigmar.T,VTr).T @ W # Step 4 - Modes
-alpha1 = Sigmar @ VTr[:,0]  # Time?
+alpha1 = Sigmar @ VTr[:,0]  # First mode POD
 b = np.linalg.solve(W @ Lambda,alpha1)  # The mode amplitudes
-    # return Phi, Lambda, b
 bPlot(b)
-print(VTr.shape)
 
+# Cut off frequency to avoid unresolved modes
+freqs = np.diag(omega).imag
+mask = (abs(freqs) > -0.1) & (abs(freqs)<2*np.pi*101)
+filtered_b = b[mask].real
+filtered_Phi = Phi[:,mask]
+filtered_frequencies = freqs[mask]
+Omega_filtered = np.diag(omega)[mask]
 
-fig, ax = plt.subplots(figsize=(3, 3))
-ax.plot(alpha1, "X", markerfacecolor="none", ms=4, c='k', alpha=0.8)
-# ax.set_xlabel(r"$\Re(\lambda)$")
-# ax.set_ylabel(r"$\Im(\lambda)$")
-plt.savefig("figures/freqs.pdf", bbox_inches="tight")
-plt.close()
+# Consider the system sorted by the real eigenvalues in descending order
+omsort = np.flip(np.argsort(Lambda.real))
+Phi_omsort = filtered_Phi[:,omsort]
+frequencies_omsort = filtered_frequencies[omsort]
+Omega_omsort = Omega_filtered[omsort]
+modea_omsort = filtered_b[omsort]
 
-
-for m in range(0,k):
-    fig, ax = plt.subplots(figsize=(3, 3))
-    # theta = np.linspace(0,1,200)*2*np.pi
-    # ax.plot(np.cos(theta)/2, np.sin(theta)/2, c='grey')
-    ax.plot(np.linspace(0,8,nt-1), VTr[m, :], c='k', alpha=0.8)
-    ax.set_xlabel(r"$t$")
-    # ax.set_ylabel(r"$\Im(\omega)$")
-    plt.savefig(f"figures/TimeDynamics/V_{m}.png", bbox_inches="tight")
-    plt.close()
-
-
-print(Lambda.shape)
-
-
-for m in range(0,k):
+for oms in range(0,20):
     fig, ax = plt.subplots(figsize=(5, 3))
-    lim = [-.0075, .0075]
+    lim = [-.01, .01]
     levels = np.linspace(lim[0], lim[1], 44)
     _cmap = sns.color_palette("seismic", as_cmap=True)
     cs = ax.contourf(
         pxs,
         pys,
-        Phi[:,m].reshape(nx, ny).T,
+        Phi[:,oms].reshape(nx, ny).T,
         levels=levels,
         vmin=lim[0],
         vmax=lim[1],
@@ -149,21 +132,50 @@ for m in range(0,k):
         extend="both",
     )
     ax.set_aspect(1)
-    # ax.set_title(f"$f^*={frequencies[m]/dt:.2f}$")
-    plt.savefig(f"./figures/modes/Phi_{m}.png", dpi=600)
+    ax.set_title(f"$\omega={frequencies_omsort[oms]:.2f}, f={frequencies_omsort[oms]/(2*np.pi):.2f}$")
+    plt.savefig(f"./figures/omsort/{oms}.png", dpi=600)
     plt.close()
 
 
-# print(Vt)
-# for m in range(0,10):
+for oms in range(180,200):
+    fig, ax = plt.subplots(figsize=(5, 3))
+    lim = [-.01, .01]
+    levels = np.linspace(lim[0], lim[1], 44)
+    _cmap = sns.color_palette("seismic", as_cmap=True)
+    cs = ax.contourf(
+        pxs,
+        pys,
+        Phi[:,oms].reshape(nx, ny).T,
+        levels=levels,
+        vmin=lim[0],
+        vmax=lim[1],
+        # norm=norm,
+        cmap=_cmap,
+        extend="both",
+    )
+    ax.set_aspect(1)
+    ax.set_title(f"$\omega={frequencies_omsort[oms]:.2f}, f={frequencies_omsort[oms]/(2*np.pi):.2f}$")
+    plt.savefig(f"./figures/omsort/{oms}.png", dpi=600)
+    plt.close()
+
+
+# # Sort based on mode amplitude
+# bsort = np.flip(np.argsort(abs(filtered_b)))
+# Phi_bsort = filtered_Phi[:,bsort]
+# frequencies_bsort = filtered_frequencies[bsort]
+# Omega_bsort = Omega_filtered[bsort]
+# modea_bsort = filtered_b[bsort]
+
+
+# for oms in range(0,50):
 #     fig, ax = plt.subplots(figsize=(5, 3))
-#     lim = [-.0075, .0075]
+#     lim = [-.01, .01]
 #     levels = np.linspace(lim[0], lim[1], 44)
 #     _cmap = sns.color_palette("seismic", as_cmap=True)
 #     cs = ax.contourf(
 #         pxs,
 #         pys,
-#         U[:,m].reshape(nx, ny).T,
+#         Phi[:,oms].reshape(nx, ny).T,
 #         levels=levels,
 #         vmin=lim[0],
 #         vmax=lim[1],
@@ -172,5 +184,43 @@ for m in range(0,k):
 #         extend="both",
 #     )
 #     ax.set_aspect(1)
-#     plt.savefig(f"./figures/modes/U_{m}.png", dpi=600)
+#     ax.set_title(f"$\omega={frequencies_bsort[oms]:.2f},b={filtered_b[bsort][oms]:.2f}$")
+#     plt.savefig(f"./figures/bsort/{oms}.png", dpi=600)
+#     plt.close()
+
+
+
+
+
+
+
+
+
+
+# # Now reconstruct based on these modes
+
+# ts = np.linspace(0.01,0.99,30)
+# left = Phi_bsort@np.diag(modea_bsort)
+# T_om = np.matrix(np.exp(Omega_bsort)).T @ np.matrix(ts)
+# Xt = left@T_om
+
+# for idx,t in enumerate(ts):
+#     fig, ax = plt.subplots(figsize=(5, 3))
+#     lim = [-.01, .01]
+#     levels = np.linspace(lim[0], lim[1], 44)
+#     _cmap = sns.color_palette("seismic", as_cmap=True)
+#     cs = ax.contourf(
+#         pxs,
+#         pys,
+#         Xt[:,idx].reshape(nx, ny).T,
+#         levels=levels,
+#         vmin=lim[0],
+#         vmax=lim[1],
+#         # norm=norm,
+#         cmap=_cmap,
+#         extend="both",
+#     )
+#     ax.set_aspect(1)
+#     # ax.set_title(f"$\omega={frequencies_bsort[bs]:.2f},b={filtered_b[bsort][bs]:.2f}$")
+#     plt.savefig(f"./figures/reconst/{t:.2f}.png", dpi=600)
 #     plt.close()
