@@ -11,7 +11,7 @@ def Sigma_plot(Sigma):
     ax.set_xlabel("Mode number")
     ax.set_ylabel(r"$ \Sigma $")
     ax.set_yscale("log")
-    plt.savefig("figures/Sigma.pdf", bbox_inches="tight")
+    plt.savefig("figures/stationary/Sigma.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -23,7 +23,7 @@ def lambdaPlot(Lambda):
     ax.plot(np.diag(Lambda).real, np.diag(Lambda).imag, "o", markerfacecolor="none", ms=1, c='k', alpha=0.8)
     ax.set_xlabel(r"$\Re(\lambda)$")
     ax.set_ylabel(r"$\Im(\lambda)$")
-    plt.savefig("figures/lambda.pdf", bbox_inches="tight")
+    plt.savefig("figures/stationary/lambda.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -35,7 +35,7 @@ def omegaPlot(omega):
     ax.plot(np.diag(omega).imag, np.diag(omega).real, "o", markerfacecolor="none", ms=1, c='k', alpha=0.8)
     ax.set_ylabel(r"$\Re(\omega)$")
     ax.set_xlabel(r"$\Im(\omega)$")
-    plt.savefig("figures/omega.pdf", bbox_inches="tight")
+    plt.savefig("figures/stationary/omega.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -47,14 +47,14 @@ def bPlot(b):
     ax.plot(b, "o", markerfacecolor="none", ms=1, c='k', alpha=0.8)
     ax.set_xlabel(r"$n$")
     ax.set_ylabel(r"$b$")
-    plt.savefig("figures/ModeAmplitudes.pdf", bbox_inches="tight")
+    plt.savefig("figures/stationary/ModeAmplitudes.pdf", bbox_inches="tight")
     plt.close()
 
 
 
 xlims, ylims = (1, 2), (-0.35, 0.35)
 
-vort = np.load("data/wake_vort.npy")
+vort = np.load("data/stationary/100k/data/vort.npy")
 vort2 = np.roll(vort, 1, axis=2)
 
 nx, ny, nt = vort.shape
@@ -66,9 +66,9 @@ pys = np.linspace(*ylims, ny)
 
 
 # Flatten snapshots along first two dimensions
-flucs = np.load("data/fluctuations.npy")
-vort1 = flucs[:, :1]
-vort2 = flucs[:, :-1]
+# flucs = np.load("data/fluctuations.npy")
+vort1 = vort.reshape(nx*ny,nt)
+vort2 = vort2.reshape(nx*ny,nt)
 
 k = 200
 # def DMD(X,Xprime,r):
@@ -115,48 +115,48 @@ frequencies_omsort = filtered_frequencies[omsort]
 Omega_omsort = Omega_filtered[omsort]
 modea_omsort = filtered_b[omsort]
 
-for oms in range(0,20):
-    fig, ax = plt.subplots(figsize=(5, 3))
-    lim = [-.01, .01]
-    levels = np.linspace(lim[0], lim[1], 44)
-    _cmap = sns.color_palette("seismic", as_cmap=True)
-    cs = ax.contourf(
-        pxs,
-        pys,
-        Phi[:,oms].reshape(nx, ny).T,
-        levels=levels,
-        vmin=lim[0],
-        vmax=lim[1],
-        # norm=norm,
-        cmap=_cmap,
-        extend="both",
-    )
-    ax.set_aspect(1)
-    ax.set_title(f"$\omega={frequencies_omsort[oms]:.2f}, f={frequencies_omsort[oms]/(2*np.pi):.2f}$")
-    plt.savefig(f"./figures/omsort/{oms}.png", dpi=600)
-    plt.close()
+# for oms in range(0,20):
+#     fig, ax = plt.subplots(figsize=(5, 3))
+#     lim = [-.01, .01]
+#     levels = np.linspace(lim[0], lim[1], 44)
+#     _cmap = sns.color_palette("seismic", as_cmap=True)
+#     cs = ax.contourf(
+#         pxs,
+#         pys,
+#         Phi[:,oms].reshape(nx, ny).T,
+#         levels=levels,
+#         vmin=lim[0],
+#         vmax=lim[1],
+#         # norm=norm,
+#         cmap=_cmap,
+#         extend="both",
+#     )
+#     ax.set_aspect(1)
+#     ax.set_title(f"$\omega={frequencies_omsort[oms]:.2f}, f={frequencies_omsort[oms]/(2*np.pi):.2f}$")
+#     plt.savefig(f"./figures/stationary/omsort/{oms}.png", dpi=600)
+#     plt.close()
 
 
-for oms in range(180,200):
-    fig, ax = plt.subplots(figsize=(5, 3))
-    lim = [-.01, .01]
-    levels = np.linspace(lim[0], lim[1], 44)
-    _cmap = sns.color_palette("seismic", as_cmap=True)
-    cs = ax.contourf(
-        pxs,
-        pys,
-        Phi[:,oms].reshape(nx, ny).T,
-        levels=levels,
-        vmin=lim[0],
-        vmax=lim[1],
-        # norm=norm,
-        cmap=_cmap,
-        extend="both",
-    )
-    ax.set_aspect(1)
-    ax.set_title(f"$\omega={frequencies_omsort[oms]:.2f}, f={frequencies_omsort[oms]/(2*np.pi):.2f}$")
-    plt.savefig(f"./figures/omsort/{oms}.png", dpi=600)
-    plt.close()
+# for oms in range(180,200):
+#     fig, ax = plt.subplots(figsize=(5, 3))
+#     lim = [-.01, .01]
+#     levels = np.linspace(lim[0], lim[1], 44)
+#     _cmap = sns.color_palette("seismic", as_cmap=True)
+#     cs = ax.contourf(
+#         pxs,
+#         pys,
+#         Phi[:,oms].reshape(nx, ny).T,
+#         levels=levels,
+#         vmin=lim[0],
+#         vmax=lim[1],
+#         # norm=norm,
+#         cmap=_cmap,
+#         extend="both",
+#     )
+#     ax.set_aspect(1)
+#     ax.set_title(f"$\omega={frequencies_omsort[oms]:.2f}, f={frequencies_omsort[oms]/(2*np.pi):.2f}$")
+#     plt.savefig(f"./figures/stationary/omsort/{oms}.png", dpi=600)
+#     plt.close()
 
 
 # # Sort based on mode amplitude
