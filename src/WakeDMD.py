@@ -108,91 +108,35 @@ filtered_Phi = Phi[:,mask]
 filtered_frequencies = freqs[mask]
 Omega_filtered = np.diag(omega)[mask]
 
-# Consider the system sorted by the real eigenvalues in descending order
-omsort = np.flip(np.argsort(Lambda.real))
-Phi_omsort = filtered_Phi[:,omsort]
-frequencies_omsort = filtered_frequencies[omsort]
-Omega_omsort = Omega_filtered[omsort]
-modea_omsort = filtered_b[omsort]
 
-# for oms in range(0,20):
-#     fig, ax = plt.subplots(figsize=(5, 3))
-#     lim = [-.01, .01]
-#     levels = np.linspace(lim[0], lim[1], 44)
-#     _cmap = sns.color_palette("seismic", as_cmap=True)
-#     cs = ax.contourf(
-#         pxs,
-#         pys,
-#         Phi[:,oms].reshape(nx, ny).T,
-#         levels=levels,
-#         vmin=lim[0],
-#         vmax=lim[1],
-#         # norm=norm,
-#         cmap=_cmap,
-#         extend="both",
-#     )
-#     ax.set_aspect(1)
-#     ax.set_title(f"$\omega={frequencies_omsort[oms]:.2f}, f={frequencies_omsort[oms]/(2*np.pi):.2f}$")
-#     plt.savefig(f"./figures/stationary/omsort/{oms}.png", dpi=600)
-#     plt.close()
+# Sort based on mode amplitude
+bsort = np.flip(np.argsort(abs(filtered_b)))
+Phi_bsort = filtered_Phi[:,bsort]
+frequencies_bsort = filtered_frequencies[bsort]
+Omega_bsort = Omega_filtered[bsort]
+modea_bsort = filtered_b[bsort]
 
 
-# for oms in range(180,200):
-#     fig, ax = plt.subplots(figsize=(5, 3))
-#     lim = [-.01, .01]
-#     levels = np.linspace(lim[0], lim[1], 44)
-#     _cmap = sns.color_palette("seismic", as_cmap=True)
-#     cs = ax.contourf(
-#         pxs,
-#         pys,
-#         Phi[:,oms].reshape(nx, ny).T,
-#         levels=levels,
-#         vmin=lim[0],
-#         vmax=lim[1],
-#         # norm=norm,
-#         cmap=_cmap,
-#         extend="both",
-#     )
-#     ax.set_aspect(1)
-#     ax.set_title(f"$\omega={frequencies_omsort[oms]:.2f}, f={frequencies_omsort[oms]/(2*np.pi):.2f}$")
-#     plt.savefig(f"./figures/stationary/omsort/{oms}.png", dpi=600)
-#     plt.close()
-
-
-# # Sort based on mode amplitude
-# bsort = np.flip(np.argsort(abs(filtered_b)))
-# Phi_bsort = filtered_Phi[:,bsort]
-# frequencies_bsort = filtered_frequencies[bsort]
-# Omega_bsort = Omega_filtered[bsort]
-# modea_bsort = filtered_b[bsort]
-
-
-# for oms in range(0,50):
-#     fig, ax = plt.subplots(figsize=(5, 3))
-#     lim = [-.01, .01]
-#     levels = np.linspace(lim[0], lim[1], 44)
-#     _cmap = sns.color_palette("seismic", as_cmap=True)
-#     cs = ax.contourf(
-#         pxs,
-#         pys,
-#         Phi[:,oms].reshape(nx, ny).T,
-#         levels=levels,
-#         vmin=lim[0],
-#         vmax=lim[1],
-#         # norm=norm,
-#         cmap=_cmap,
-#         extend="both",
-#     )
-#     ax.set_aspect(1)
-#     ax.set_title(f"$\omega={frequencies_bsort[oms]:.2f},b={filtered_b[bsort][oms]:.2f}$")
-#     plt.savefig(f"./figures/bsort/{oms}.png", dpi=600)
-#     plt.close()
-
-
-
-
-
-
+for oms in range(0,20):
+    fig, ax = plt.subplots(figsize=(5, 3))
+    lim = [-.01, .01]
+    levels = np.linspace(lim[0], lim[1], 44)
+    _cmap = sns.color_palette("seismic", as_cmap=True)
+    cs = ax.contourf(
+        pxs,
+        pys,
+        Phi[:,oms].reshape(nx, ny).T,
+        levels=levels,
+        vmin=lim[0],
+        vmax=lim[1],
+        # norm=norm,
+        cmap=_cmap,
+        extend="both",
+    )
+    ax.set_aspect(1)
+    ax.set_title(f"$\omega={frequencies_bsort[oms]:.2f},b={filtered_b[bsort][oms]:.2f}$")
+    plt.savefig(f"./figures/bsort/{oms}.png", dpi=600)
+    plt.close()
 
 
 
