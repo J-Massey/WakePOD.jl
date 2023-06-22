@@ -52,7 +52,7 @@ def bPlot(b):
 
 
 
-xlims, ylims = (1, 2), (-0.35, 0.35)
+xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 
 vort = np.load("data/stationary/100k/data/vort.npy")
 vort2 = np.roll(vort, 1, axis=2)
@@ -117,7 +117,7 @@ Omega_bsort = Omega_filtered[bsort]
 modea_bsort = filtered_b[bsort]
 
 
-for oms in range(0,20):
+for oms in range(0,15):
     fig, ax = plt.subplots(figsize=(5, 3))
     lim = [-.01, .01]
     levels = np.linspace(lim[0], lim[1], 44)
@@ -134,37 +134,37 @@ for oms in range(0,20):
         extend="both",
     )
     ax.set_aspect(1)
-    ax.set_title(f"$\omega={frequencies_bsort[oms]:.2f},b={filtered_b[bsort][oms]:.2f}$")
-    plt.savefig(f"./figures/bsort/{oms}.png", dpi=600)
+    ax.set_title(f"$\omega={frequencies_bsort[oms]:.2f},St={frequencies_bsort[oms]/(2*np.pi):.2f}$")
+    plt.savefig(f"./figures/stationary/bsort/{oms}.png", dpi=600)
     plt.close()
 
 
 
 
-# # Now reconstruct based on these modes
+# Now reconstruct based on these modes
 
-# ts = np.linspace(0.01,0.99,30)
-# left = Phi_bsort@np.diag(modea_bsort)
-# T_om = np.matrix(np.exp(Omega_bsort)).T @ np.matrix(ts)
-# Xt = left@T_om
+ts = np.linspace(0.01,0.99,30)
+left = Phi_bsort@np.diag(modea_bsort)
+T_om = np.matrix(np.exp(Omega_bsort)).T @ np.matrix(ts)
+Xt = left@T_om
 
-# for idx,t in enumerate(ts):
-#     fig, ax = plt.subplots(figsize=(5, 3))
-#     lim = [-.01, .01]
-#     levels = np.linspace(lim[0], lim[1], 44)
-#     _cmap = sns.color_palette("seismic", as_cmap=True)
-#     cs = ax.contourf(
-#         pxs,
-#         pys,
-#         Xt[:,idx].reshape(nx, ny).T,
-#         levels=levels,
-#         vmin=lim[0],
-#         vmax=lim[1],
-#         # norm=norm,
-#         cmap=_cmap,
-#         extend="both",
-#     )
-#     ax.set_aspect(1)
-#     # ax.set_title(f"$\omega={frequencies_bsort[bs]:.2f},b={filtered_b[bsort][bs]:.2f}$")
-#     plt.savefig(f"./figures/reconst/{t:.2f}.png", dpi=600)
-#     plt.close()
+for idx,t in enumerate(ts):
+    fig, ax = plt.subplots(figsize=(5, 3))
+    lim = [-.01, .01]
+    levels = np.linspace(lim[0], lim[1], 44)
+    _cmap = sns.color_palette("seismic", as_cmap=True)
+    cs = ax.contourf(
+        pxs,
+        pys,
+        Xt[:,idx].reshape(nx, ny).T,
+        levels=levels,
+        vmin=lim[0],
+        vmax=lim[1],
+        # norm=norm,
+        cmap=_cmap,
+        extend="both",
+    )
+    ax.set_aspect(1)
+    # ax.set_title(f"$\omega={frequencies_bsort[bs]:.2f},b={filtered_b[bsort][bs]:.2f}$")
+    plt.savefig(f"./figures/reconst/{t:.2f}.png", dpi=600)
+    plt.close()
