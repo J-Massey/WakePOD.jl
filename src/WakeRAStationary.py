@@ -52,9 +52,10 @@ def bPlot(b):
 
 
 flow = np.load("data/stationary/10k/v.npy")
+flow = np.einsum("ijk -> kji", flow)
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nt, ny, nx = flow.shape
-T = 8  # number of cycles
+T = 16/1.5  # number of cycles
 dt = T / nt
 pxs = np.linspace(*xlims, nx)
 pys = np.linspace(*ylims, ny)

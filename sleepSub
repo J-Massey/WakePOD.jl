@@ -2,11 +2,11 @@
 
 #SBATCH --ntasks=64
 #SBATCH --nodes=1
-#SBATCH --partition=amd
+#SBATCH --partition=highmem
 #SBATCH --job-name=SPOD
 #SBATCH --time=10:00:00
 #SBATCH --output=INT.out
-#SBATCH --exclusive
+# SBATCH --exclusive
 # SBATCH --exclude=ruby035,ruby036,ruby037
 # SBATCH --dependency=afterok:1908224
 
@@ -17,6 +17,8 @@ module purge
 # module load openmpi/4.0.5/amd
 module load conda
 source activate an
+module load texlive
 # module load openmpi/4.1.4/gcc
 
+# pyton src/full-RA-stationary.py
 sleep 720000

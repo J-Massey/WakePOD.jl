@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --ntasks=48
+#SBATCH --ntasks=64
 #SBATCH --nodes=1
 #SBATCH --partition=highmem
 #SBATCH --job-name=SPOD

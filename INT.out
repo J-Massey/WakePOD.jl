@@ -1,37 +1,16 @@
-Running SLURM prolog script on ruby052.cluster.local
+Running SLURM prolog script on gold57.cluster.local
 ===============================================================================
-Job started on Sat Jun 24 10:29:05 BST 2023
-Job ID          : 3898693
+Job started on Wed Jun 28 09:49:37 BST 2023
+Job ID          : 3921270
 Job name        : SPOD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
-Partition       : amd
+Partition       : highmem
 Num hosts       : 1
 Num cores       : 64
 Num of tasks    : 64
-Hosts allocated : ruby052
+Hosts allocated : gold57
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Sat Jun 24 10:29:05 BST 2023
+Starting calculation at Wed Jun 28 09:49:37 BST 2023
 ---------------------------------------------------------------
-slurmstepd-ruby052: error: *** JOB 3898693 ON ruby052 CANCELLED AT 2023-06-24T20:29:05 DUE TO TIME LIMIT ***
-==============================================================================
-Running epilogue script on ruby052.
-
-Submit time  : 2023-06-24T10:20:50
-Start time   : 2023-06-24T10:29:04
-End time     : 2023-06-24T20:29:05
-Elapsed time : 10:00:01 (Timelimit=10:00:00)
-
-Job ID: 3898693
-Cluster: i5
-User/Group: jmom1n15/mm
-State: TIMEOUT (exit code 0)
-Nodes: 1
-Cores per node: 64
-CPU Utilized: 1-05:42:23
-CPU Efficiency: 4.64% of 26-16:01:04 core-walltime
-Job Wall-clock time: 10:00:01
-Memory Utilized: 229.70 GB
-Memory Efficiency: 102.09% of 225.00 GB
-
