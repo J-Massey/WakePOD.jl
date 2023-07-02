@@ -1,6 +1,7 @@
 import numpy as np
 from lotusvis.spod import spod
 from scipy.fft import fft, ifft, fftfreq
+import scipy.sparse as sp
 from src.fft_wrapper import fft_wrapper
 import h5py
 import os
@@ -17,15 +18,15 @@ plt.rcParams["font.size"] = "10.5"
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-u = u[::2, ::2, :]
+u = u[::4, ::4, :250]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-v = v[::2, ::2, :]
+v = v[::4, ::4, :250]
 # u = np.random.rand(9, 10, 11)
 # v = np.random.rand(9, 10, 11)
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
-T = 16/1.5  # number of cycles
+T = 28  # number of cycles
 dt = T / nt
 pxs = np.linspace(*xlims, nx)
 dx = np.diff(pxs).mean()
@@ -48,7 +49,11 @@ print("Flucs done")
 means = np.array([u_mean, v_mean])
 flucs_field = np.array([u_flucs, v_flucs])
 flat_flucs = flucs_field.reshape(2, nx*ny, nt)
-mean_field = np.repeat(means.reshape(2, nx, ny, 1), nt, axis=3)
+flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
+flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
+_, fNt = flatfucku.shape
+fft_flucs = np.array([flatfucku, flatfuckv]).reshape(2, nx, ny, fNt)
+mean_field = np.repeat(means.reshape(2, nx, ny, 1), fNt, axis=3)
 
 print("FFT done")
 
@@ -83,46 +88,33 @@ def grad(q, dx, dy):
     return grad
 
 
-def lns_operator(ubar, q, Re):
+def lns_operator(ubar, cheb_colloc, Re):
     # Extracting the dimensions
-    dim, nt, ny, nx = q.shape
+    dim, nt, ny, nx = ubar.shape
 
     # Compute the dot products
-    dot_product1 = -(ubar * grad(q, dx, dy)).sum(axis=0)
-    dot_product2 = -(q * grad(ubar, dx, dy)).sum(axis=0)
-        
-    # Compute the Laplacian of u_bar as the second derivatives
-    laplacian = compute_laplacian(q, dx, dy)
+    dot_product1 = -(ubar * grad(cheb_colloc, dx, dy)).sum(axis=0)
+    dot_product2 = -(cheb_colloc * grad(ubar, dx, dy)).sum(axis=0)
+
+    # Compute the Laplacian of ubar as the second derivatives
+    laplacian = compute_laplacian(cheb_colloc, dx, dy)
 
     # Combine the terms
-    operator = np.empty_like(q)
+    operator = np.empty_like(ubar)
     for d in range(dim):
-        operator[d] = dot_product1 + dot_product2\
-        + 1/Re * laplacian[d]
+        operator[d] = dot_product1 + dot_product2 + 1 / Re * laplacian[d]
     return operator
 
 L = lns_operator(mean_field, flucs_field, 10250)
 
-Laplacian = compute_laplacian(mean_field, dx, dy)
-Laplacian_operator = np.linalg.solve(Laplacian, mean_field)
-
-N=20
-Adj = np.zeros((N * N, N * N))
-Deg = np.diag(sum(Adj, 2))
-L = Deg - Adj
 
 np.save("data/stationary/10k/L.npy", L)
 # L = np.load("data/stationary/10k/L.npy")
-
 dim, nx, ny, fNt = L.shape
 Lflat = L.reshape(2, nx*ny, fNt)
 
-flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
-flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
-_, fNt = flatfucku.shape
-fft_flucs = np.array([flatfucku, flatfuckv]).reshape(2, nx, ny, fNt)
 
-np.save("data/stationary/10k/fft_velocity.npy", fft_flucs)
+# np.save("data/stationary/10k/fft_velocity.npy", fft_flucs)
 # Lflatfftu = fft(Lflat[0].T)
 # Lflatfftv = fft(Lflat[1].T)
 

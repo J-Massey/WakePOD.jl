@@ -53,36 +53,35 @@ def bPlot(b):
     plt.close()
 
 
-flow = np.load("data/wake_vort.npy")
-xlims, ylims = (1, 2), (-0.35, 0.35)
-nx, ny, nt = flow.shape
-T = 8  # number of cycles
+v = np.load("data/stationary/10k/v.npy")
+v = np.einsum("ijk -> kji", v)
+v = v[::2, ::2, :]
+xlims, ylims = (-0.35, 2), (-0.35, 0.35)
+nx, ny, nt = v.shape
+T = 16/1.5  # number of cycles
 dt = T / nt
 pxs = np.linspace(*xlims, nx)
+dx = np.diff(pxs).mean()
 pys = np.linspace(*ylims, ny)
+dy = np.diff(pys).mean()
 
-# Split the data into phases
-phases = np.split(flow, T, axis=2)
-phase_average = np.array(phases).mean(axis=0)
-phase_fluctuations = np.empty((nx, ny, nt))
-for t in range(T):
-    phase_fluctuations[:, :, t*int(nt/T):(t+1)*int(nt/T)] = phases[t] - phase_average
+print("Loaded fields done")
 
-np.save("data/phase_fluctuations.npy", phase_fluctuations)
-
-# time_flucs = flow - flow.mean(axis=2)[:, :, None]
-# np.save("data/time_flucs.npy", time_flucs)
-del flow
+# Reynolds decomposition
+v_flucs = np.empty_like(v)
+v_mean = v.mean(axis=2)
+for t in range(nt):
+    v_flucs[:,:,t] = v[:, :, t] - v_mean
 # time_flucs = np.load("data/time_flucs.npy")
 
 
 # Define inputs for DMD
-flat_flucs = phase_fluctuations.reshape(nx*ny, nt)
+flat_flucs = v_flucs.reshape(nx*ny, nt)
 fluc1 = flat_flucs
 fluc2 = np.roll(flat_flucs, 1, axis=1)
 
 
-k = 200
+k = 100
 # def fbDMD(fluc1,fluc2,k):
 # backwards
 # U,Sigma,VT = np.linalg.svd(fluc2,full_matrices=False)
@@ -103,9 +102,8 @@ Atilde = np.linalg.solve(Sigmar.T,(Ur.T @ fluc2 @ VTr.T).T).T # Step 2 - Find th
 
 rho, W = np.linalg.eig(Atilde) # Step 3 - Eigenvalues
 Wadj = np.conjugate(W).T
-rho = np.diag(rho)
 
-Lambda = np.diag(np.log(rho))/dt  # Spectral expansion
+Lambda = np.log(W)/dt  # Spectral expansion
 
 Phi = fluc2 @ np.linalg.solve(Sigmar.T,VTr).T @ W # Step 4 - Modes
 alpha1 = Sigmar @ VTr[:,0]  # First mode POD
@@ -126,10 +124,10 @@ Lambda =  Lambda[large]
 # Lambda = np.diag(Lambda)[mask]
 
 # define the resolvant operator
-omegaSpan = np.linspace(-2*np.pi*100, 2*np.pi*100, 800)
+omegaSpan = np.linspace(-10, 2*np.pi*10, 50)
 gain = np.empty((omegaSpan.size, k))
 for idx, omega in enumerate(omegaSpan):
-    R = np.linalg.svd(np.linalg.inv(-1j*omega*np.eye(Lambda.size)-Lambda),
+    R = np.linalg.svd(np.linalg.inv(-1j*omega*np.eye(k)-Lambda),
                       compute_uv=False)
     gain[idx] = R**2
 
@@ -138,7 +136,7 @@ fig, ax = plt.subplots(figsize = (3,3))
 ax.set_yscale('log')
 ax.set_xlabel(r"$\omega$")
 ax.set_ylabel(r"$\sigma_j$")
-for i in range(0,10):
+for i in range(0,2):
     ax.plot(omegaSpan, np.sqrt(gain[:, i]))
 plt.savefig("figures/opt_gain.pdf")
 plt.close()

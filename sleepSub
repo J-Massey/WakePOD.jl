@@ -14,10 +14,10 @@ echo "Starting calculation at $(date)"
 echo "---------------------------------------------------------------"
 
 module purge
+module load texlive
 # module load openmpi/4.0.5/amd
 module load conda
 source activate an
-module load texlive
 # module load openmpi/4.1.4/gcc
 
 # pyton src/full-RA-stationary.py

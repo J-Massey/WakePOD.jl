@@ -11,9 +11,10 @@ plt.style.use(["science"])
 plt.rcParams["font.size"] = "10.5"
 
 flow = np.load("data/stationary/10k/v.npy")
+print("Loaded")
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nt, ny, nx = flow.shape
-T = 16/1.5  # number of cycles
+T = 28  # number of cycles
 dt = T / nt
 pxs = np.linspace(*xlims, nx)
 pys = np.linspace(*ylims, ny)
@@ -33,7 +34,7 @@ _cmap = sns.color_palette("seismic", as_cmap=True)
 cs = ax.contourf(
     pxs,
     pys,
-    flatflucs[0, :].reshape(ny, nx),
+    flatflucs.mean(axis=0).reshape(ny, nx),
     levels=levels,
     vmin=lim[0],
     vmax=lim[1],
@@ -46,8 +47,10 @@ ax.set_aspect(1)
 plt.savefig(f"./stationary/figures/testv10k.pdf", dpi=600)
 plt.close()
 
+print("Plotted")
 
-# spod(flatflucs,dt,"stationary/10k",weight='default',nOvlp='default',window='default',method='fast', nDFT=nt/4)
+
+spod(flatflucs,dt,"stationary/10k",weight='default',nOvlp='default',window='default',method='fast', nDFT=nt/4)
 
 SPOD_LPf  = h5py.File(os.path.join('stationary/10k','SPOD_LPf.h5'),'r') # load data from h5 format
 
