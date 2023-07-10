@@ -11,6 +11,7 @@ plt.style.use(["science"])
 plt.rcParams["font.size"] = "10.5"
 
 flow = np.load("data/stationary/10k/v.npy")
+flow  = flow[::4, :, :]
 print("Loaded")
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nt, ny, nx = flow.shape

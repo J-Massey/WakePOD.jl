@@ -18,10 +18,10 @@ plt.rcParams["font.size"] = "10.5"
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-u = u[::4, ::4, ::4]
+u = u[::2, ::2, ::2]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-v = v[::4, ::4, ::4]
+v = v[::2, ::2, ::2]
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
 T = 28  # number of cycles
@@ -46,7 +46,7 @@ print("Flucs done")
 
 means = np.array([u_mean, v_mean])
 flucs_field = np.array([u_flucs, v_flucs])
-flat_flucs = flucs_field.reshape(2, nx*ny, nt)
+# flat_flucs = flucs_field.reshape(2, nx*ny, nt)
 # flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
 # flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
 # _, fNt = flatfucku.shape
@@ -90,8 +90,8 @@ def lns_operator(ubar, q, Re):
     # Extracting the dimensions
     dim, nt, ny, nx = q.shape
     
-    dot_product1 = -(ubar * grad(q, dx, dy)).sum(axis=0)
-    dot_product2 = -(q * grad(ubar, dx, dy)).sum(axis=0)
+    dot_product1 = -(np.flip(ubar, axis=0) * grad(q, dx, dy)).sum(axis=0)
+    dot_product2 = -(np.flip(q, axis=0) * grad(ubar, dx, dy)).sum(axis=0)
         
     # Compute the Laplacian of u_bar as the second derivatives
     laplacian = compute_laplacian(q, dx, dy)
@@ -101,14 +101,14 @@ def lns_operator(ubar, q, Re):
         + 1/Re * laplacian[d]
     return operator
 
-L = lns_operator(mean_field, fft_flucs, 10250)
+L = lns_operator(mean_field, flucs_field, 10250)
 
 # Define inputs for DMD on the vertical velocity
-flat_flucs = L[1].reshape(nx*ny, fNt)
+flat_flucs = L[1].reshape(nx*ny, nt)
 fluc1 = flat_flucs[:, :-1]
 fluc2 = flat_flucs[:, 1:]
 
-k = 200
+k = 100
 # def fbDMD(fluc1,fluc2,k):
 # backwards
 U,Sigma,VT = np.linalg.svd(fluc2,full_matrices=False)
@@ -143,10 +143,10 @@ Lambda = np.log(rho)/dt  # Spectral expansion
 # Lambda =  Lambda[large]
 
 # define the resolvant operator
-omegaSpan = np.linspace(0, 2*np.pi*40, 500)
+omegaSpan = np.linspace(0, 2, 100)
 gain = np.empty((omegaSpan.size, k))
 for idx, omega in enumerate(omegaSpan):
-    R = np.linalg.svd(np.linalg.inv(-1j*omega*np.eye(k)-np.diag(Lambda)),
+    R = np.linalg.svd(np.linalg.inv(-1j*omega*np.eye(k)-(Atilde)),
                       compute_uv=False)
     gain[idx] = R**2
 
@@ -157,7 +157,7 @@ ax.set_xlabel(r"$f^*$")
 ax.set_ylabel(r"$\sigma_j$")
 # ax.set_xlim(0, 10)
 for i in range(0,4):
-    ax.plot(omegaSpan/(2*np.pi), np.sqrt(gain[:, i]))
+    ax.plot(omegaSpan, np.sqrt(gain[:, i]))
 
-plt.savefig("figures/opt_gain.pdf")
+plt.savefig("figures/opt_gain_DMD.pdf")
 plt.close()

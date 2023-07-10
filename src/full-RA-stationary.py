@@ -1,12 +1,13 @@
+import os
+from tqdm import tqdm
+
 import numpy as np
 from lotusvis.spod import spod
 from scipy.fft import fft, ifft, fftfreq
 import scipy.sparse as sp
 from src.fft_wrapper import fft_wrapper
 import h5py
-import os
-from tqdm import tqdm
-
+from fenics import *
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -16,30 +17,44 @@ plt.style.use(["science"])
 plt.rcParams["font.size"] = "10.5"
 
 
-u = np.load("data/stationary/10k/u.npy")
-u = np.einsum("ijk -> kji", u)
-u = u[::4, ::4, :250]
-v = np.load("data/stationary/10k/v.npy")
-v = np.einsum("ijk -> kji", v)
-v = v[::4, ::4, :250]
+# u = np.load("data/stationary/10k/u.npy")
+# u = np.einsum("ijk -> kji", u)
+# u = u[::8, ::8, :250]
+u = np.random.rand(200,400,50)
+# v = np.load("data/stationary/10k/v.npy")
+# v = np.einsum("ijk -> kji", v)
+# v = v[::8, ::8, :250]
+v = np.random.rand(200,400,50)
 # u = np.random.rand(9, 10, 11)
 # v = np.random.rand(9, 10, 11)
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
 T = 28  # number of cycles
+T = 4
 dt = T / nt
 pxs = np.linspace(*xlims, nx)
 dx = np.diff(pxs).mean()
 pys = np.linspace(*ylims, ny)
 dy = np.diff(pys).mean()
 
+domain = Rectangle(Point(xlims[0], ylims[0]), Point(xlims[1], xlims[1]))
+mesh = RectangleMesh(domain, nx, ny)
+# Define function spaces
+P1 = FiniteElement('P', triangle, 1)
+element = VectorElement(P1, dim=2)
+V = FunctionSpace(mesh, element)
+
+# Construct the linear operator
+u_mean = u.mean(axis=2)
+v_mean = v.mean(axis=2)
+flat_v_mean = v_mean.reshape(v_mean.shape[0]*v_mean.shape[1])
+n = flat_v_mean.size
+
 print("Loaded fields done")
 
 # Reynolds decomposition
 u_flucs = np.empty_like(u)
 v_flucs = np.empty_like(v)
-u_mean = u.mean(axis=2)
-v_mean = v.mean(axis=2)
 for t in range(nt):
     u_flucs[:,:,t] = u[:, :, t] - u_mean
     v_flucs[:,:,t] = v[:, :, t] - v_mean
@@ -49,15 +64,82 @@ print("Flucs done")
 means = np.array([u_mean, v_mean])
 flucs_field = np.array([u_flucs, v_flucs])
 flat_flucs = flucs_field.reshape(2, nx*ny, nt)
-flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
-flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
-_, fNt = flatfucku.shape
-fft_flucs = np.array([flatfucku, flatfuckv]).reshape(2, nx, ny, fNt)
-mean_field = np.repeat(means.reshape(2, nx, ny, 1), fNt, axis=3)
+# flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
+# flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
+# _, fNt = flatfucku.shape
+# fft_flucs = np.array([flatfucku, flatfuckv]).reshape(2, nx, ny, fNt)
+mean_field = np.repeat(means.reshape(2, nx, ny, 1), nt, axis=3)
 
 print("FFT done")
 
+
+def create_laplacian_operator(nx, ny):
+    size = nx * ny
+    # Diagonal values
+    main_diag = np.ones(size) * -4
+    off_diag = np.ones(size - 1)
+    off_diag[nx-1::nx] = 0  # Set off-diagonal values to 0 for last column in each row
+    off_diag2 = np.ones(size - nx)
+    diagonals = [main_diag, off_diag, off_diag, off_diag2, off_diag2]
+    # Offsets for diagonals
+    offsets = [0, -1, 1, -nx, nx]
+    laplacian_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
+    return laplacian_operator
+
+def create_grad_operator(nx, ny):
+    size = nx * ny
+    # Diagonal values
+    main_diag = np.ones(size) * 0
+    off_diag = np.ones(size)*1
+    # off_diag[nx-1::nx] = 0  # Set off-diagonal values to 0 for last column in each row
+    off_diag2 = np.ones(size) * -1
+    diagonals = [main_diag, off_diag, off_diag2]
+    # Offsets for diagonals
+    offsets = [0, -1, 1]
+    grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
+    # Set corners appropriately
+    grad_operator[0, 0] = -1.5
+    grad_operator[0, 1] = 2
+    grad_operator[0, 2] = -0.5
+    grad_operator[size-1, size-1] = 1.5
+    grad_operator[size-1, size-2] = -2
+    grad_operator[size-1, size-3] = 0.5
+    return grad_operator
+
+# Example usage
+nx = 5
+ny = 4
+utest = np.linspace(0,nx-1,nx).reshape(nx,1) @ np.ones(ny).reshape(1,ny)
+utest
+create_grad_operator(nx, ny).toarray()
+op = create_grad_operator(nx, ny).toarray()
+op.T@utest.reshape(nx*ny,1)
+utest.T.reshape(1,nx*ny)@np.gradient(np.eye(nx*ny), axis=0, edge_order=2)
+np.gradient()
+
+np.gradient(utest, axis=0, edge_order=2)
+print(laplacian.toarray())
+
+
 def compute_laplacian(q, dx, dy):
+    # Extracting the dimensions
+    dim = 2
+    
+    # Computing the Laplacian
+    laplacian = np.empty_like(q)
+    
+    for d in range(dim):
+        laplacian[d] = np.gradient(
+            np.gradient(q[d], dx, axis=0, edge_order=2),
+            dx, axis=0, edge_order=2
+        ) + np.gradient(
+            np.gradient(q[d], dy, axis=1, edge_order=2),
+            dy, axis=1, edge_order=2
+        )
+    
+    return laplacian
+
+def discrete_laplacian(q, dx, dy):
     # Extracting the dimensions
     dim = 2
     
@@ -88,16 +170,16 @@ def grad(q, dx, dy):
     return grad
 
 
-def lns_operator(ubar, cheb_colloc, Re):
+def lns_operator(ubar, sketch, Re):
     # Extracting the dimensions
     dim, nt, ny, nx = ubar.shape
 
     # Compute the dot products
-    dot_product1 = -(ubar * grad(cheb_colloc, dx, dy)).sum(axis=0)
-    dot_product2 = -(cheb_colloc * grad(ubar, dx, dy)).sum(axis=0)
+    dot_product1 = -(ubar * grad(sketch, dx, dy)).sum(axis=0)
+    dot_product2 = -(sketch * grad(ubar, dx, dy)).sum(axis=0)
 
     # Compute the Laplacian of ubar as the second derivatives
-    laplacian = compute_laplacian(cheb_colloc, dx, dy)
+    laplacian = compute_laplacian(sketch, dx, dy)
 
     # Combine the terms
     operator = np.empty_like(ubar)

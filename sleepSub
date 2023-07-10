@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --partition=highmem
 #SBATCH --job-name=SPOD
-#SBATCH --time=10:00:00
+#SBATCH --time=8:00:00
 #SBATCH --output=INT.out
 # SBATCH --exclusive
 # SBATCH --exclude=ruby035,ruby036,ruby037

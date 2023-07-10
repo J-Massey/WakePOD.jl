@@ -1,7 +1,7 @@
-Running SLURM prolog script on gold60.cluster.local
+Running SLURM prolog script on gold61.cluster.local
 ===============================================================================
-Job started on Sun Jul  2 13:30:59 BST 2023
-Job ID          : 3943624
+Job started on Sun Jul  9 11:15:58 BST 2023
+Job ID          : 3967066
 Job name        : SPOD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
@@ -9,8 +9,29 @@ Partition       : highmem
 Num hosts       : 1
 Num cores       : 64
 Num of tasks    : 64
-Hosts allocated : gold60
+Hosts allocated : gold61
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Sun Jul  2 13:30:59 BST 2023
+Starting calculation at Sun Jul  9 11:15:59 BST 2023
 ---------------------------------------------------------------
+slurmstepd-gold61: error: *** JOB 3967066 ON gold61 CANCELLED AT 2023-07-09T19:16:04 DUE TO TIME LIMIT ***
+==============================================================================
+Running epilogue script on gold61.
+
+Submit time  : 2023-07-09T11:15:02
+Start time   : 2023-07-09T11:15:58
+End time     : 2023-07-09T19:16:03
+Elapsed time : 08:00:05 (Timelimit=08:00:00)
+
+Job ID: 3967066
+Cluster: i5
+User/Group: jmom1n15/mm
+State: TIMEOUT (exit code 0)
+Nodes: 1
+Cores per node: 64
+CPU Utilized: 00:08:10
+CPU Efficiency: 0.03% of 21-08:05:20 core-walltime
+Job Wall-clock time: 08:00:05
+Memory Utilized: 48.66 GB
+Memory Efficiency: 3.30% of 1.44 TB
+
