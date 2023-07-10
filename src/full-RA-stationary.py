@@ -7,7 +7,6 @@ from scipy.fft import fft, ifft, fftfreq
 import scipy.sparse as sp
 from src.fft_wrapper import fft_wrapper
 import h5py
-from fenics import *
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -25,8 +24,7 @@ u = np.random.rand(200,400,50)
 # v = np.einsum("ijk -> kji", v)
 # v = v[::8, ::8, :250]
 v = np.random.rand(200,400,50)
-# u = np.random.rand(9, 10, 11)
-# v = np.random.rand(9, 10, 11)
+
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
 T = 28  # number of cycles
@@ -37,40 +35,44 @@ dx = np.diff(pxs).mean()
 pys = np.linspace(*ylims, ny)
 dy = np.diff(pys).mean()
 
-domain = Rectangle(Point(xlims[0], ylims[0]), Point(xlims[1], xlims[1]))
-mesh = RectangleMesh(domain, nx, ny)
-# Define function spaces
-P1 = FiniteElement('P', triangle, 1)
-element = VectorElement(P1, dim=2)
-V = FunctionSpace(mesh, element)
+# domain = Rectangle(Point(xlims[0], ylims[0]), Point(xlims[1], xlims[1]))
+# mesh = RectangleMesh(domain, nx, ny)
+# # Define function spaces
+# P1 = FiniteElement('P', triangle, 1)
+# element = VectorElement(P1, dim=2)
+# V = FunctionSpace(mesh, element)
 
 # Construct the linear operator
 u_mean = u.mean(axis=2)
 v_mean = v.mean(axis=2)
+# Set ghost cells around the outside
+u_mean = np.pad(u_mean, (1, 1), mode="constant")
+v_mean = np.pad(v_mean, (1, 1), mode="constant")
+# Flatten the mean fields
 flat_v_mean = v_mean.reshape(v_mean.shape[0]*v_mean.shape[1])
 n = flat_v_mean.size
 
 print("Loaded fields done")
 
-# Reynolds decomposition
-u_flucs = np.empty_like(u)
-v_flucs = np.empty_like(v)
-for t in range(nt):
-    u_flucs[:,:,t] = u[:, :, t] - u_mean
-    v_flucs[:,:,t] = v[:, :, t] - v_mean
+# # Reynolds decomposition
+# u_flucs = np.empty_like(u)
+# v_flucs = np.empty_like(v)
+# for t in range(nt):
+#     u_flucs[:,:,t] = u[:, :, t] - u_mean
+#     v_flucs[:,:,t] = v[:, :, t] - v_mean
 
-print("Flucs done")
+# print("Flucs done")
 
-means = np.array([u_mean, v_mean])
-flucs_field = np.array([u_flucs, v_flucs])
-flat_flucs = flucs_field.reshape(2, nx*ny, nt)
-# flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
-# flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
-# _, fNt = flatfucku.shape
-# fft_flucs = np.array([flatfucku, flatfuckv]).reshape(2, nx, ny, fNt)
-mean_field = np.repeat(means.reshape(2, nx, ny, 1), nt, axis=3)
+# means = np.array([u_mean, v_mean])
+# flucs_field = np.array([u_flucs, v_flucs])
+# flat_flucs = flucs_field.reshape(2, nx*ny, nt)
+# # flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
+# # flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
+# # _, fNt = flatfucku.shape
+# # fft_flucs = np.array([flatfucku, flatfuckv]).reshape(2, nx, ny, fNt)
+# mean_field = np.repeat(means.reshape(2, nx, ny, 1), nt, axis=3)
 
-print("FFT done")
+# print("FFT done")
 
 
 def create_laplacian_operator(nx, ny):
@@ -90,30 +92,30 @@ def create_grad_operator(nx, ny):
     size = nx * ny
     # Diagonal values
     main_diag = np.ones(size) * 0
-    off_diag = np.ones(size)*1
+    off_diag = np.ones(size)*-0.5
     # off_diag[nx-1::nx] = 0  # Set off-diagonal values to 0 for last column in each row
-    off_diag2 = np.ones(size) * -1
+    off_diag2 = np.ones(size) * 0.5
     diagonals = [main_diag, off_diag, off_diag2]
     # Offsets for diagonals
     offsets = [0, -1, 1]
     grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
-    # Set corners appropriately
-    grad_operator[0, 0] = -1.5
-    grad_operator[0, 1] = 2
-    grad_operator[0, 2] = -0.5
-    grad_operator[size-1, size-1] = 1.5
-    grad_operator[size-1, size-2] = -2
-    grad_operator[size-1, size-3] = 0.5
+    # Set ghost cells around the outside
+    grad_operator[0, 1] = 0
+    grad_operator[1, 0] = 0
+    grad_operator[size-2, size-1] = 0
+    grad_operator[size-1, size-2] = 0
     return grad_operator
 
 # Example usage
-nx = 5
-ny = 4
-utest = np.linspace(0,nx-1,nx).reshape(nx,1) @ np.ones(ny).reshape(1,ny)
+nx = 20
+ny = 40
+utest = np.matrix(np.ones(ny).reshape(ny,1) @ np.linspace(0,nx-1,nx).reshape(1,nx))
+utest = np.pad(utest, (1, 1), mode="constant")
 utest
 create_grad_operator(nx, ny).toarray()
 op = create_grad_operator(nx, ny).toarray()
-op.T@utest.reshape(nx*ny,1)
+(op@utest.reshape(nx*ny,1)).reshape(ny,nx)
+
 utest.T.reshape(1,nx*ny)@np.gradient(np.eye(nx*ny), axis=0, edge_order=2)
 np.gradient()
 
