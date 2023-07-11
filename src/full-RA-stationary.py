@@ -35,13 +35,6 @@ dx = np.diff(pxs).mean()
 pys = np.linspace(*ylims, ny)
 dy = np.diff(pys).mean()
 
-# domain = Rectangle(Point(xlims[0], ylims[0]), Point(xlims[1], xlims[1]))
-# mesh = RectangleMesh(domain, nx, ny)
-# # Define function spaces
-# P1 = FiniteElement('P', triangle, 1)
-# element = VectorElement(P1, dim=2)
-# V = FunctionSpace(mesh, element)
-
 # Construct the linear operator
 u_mean = u.mean(axis=2)
 v_mean = v.mean(axis=2)
@@ -54,73 +47,91 @@ n = flat_v_mean.size
 
 print("Loaded fields done")
 
-# # Reynolds decomposition
-# u_flucs = np.empty_like(u)
-# v_flucs = np.empty_like(v)
-# for t in range(nt):
-#     u_flucs[:,:,t] = u[:, :, t] - u_mean
-#     v_flucs[:,:,t] = v[:, :, t] - v_mean
 
-# print("Flucs done")
-
-# means = np.array([u_mean, v_mean])
-# flucs_field = np.array([u_flucs, v_flucs])
-# flat_flucs = flucs_field.reshape(2, nx*ny, nt)
-# # flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
-# # flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
-# # _, fNt = flatfucku.shape
-# # fft_flucs = np.array([flatfucku, flatfuckv]).reshape(2, nx, ny, fNt)
-# mean_field = np.repeat(means.reshape(2, nx, ny, 1), nt, axis=3)
-
-# print("FFT done")
-
-
-def create_laplacian_operator(nx, ny):
-    size = nx * ny
-    # Diagonal values
-    main_diag = np.ones(size) * -4
-    off_diag = np.ones(size - 1)
-    off_diag[nx-1::nx] = 0  # Set off-diagonal values to 0 for last column in each row
-    off_diag2 = np.ones(size - nx)
-    diagonals = [main_diag, off_diag, off_diag, off_diag2, off_diag2]
-    # Offsets for diagonals
-    offsets = [0, -1, 1, -nx, nx]
-    laplacian_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
-    return laplacian_operator
-
-def create_grad_operator(nx, ny):
+def create_grad_operator_y(nx, ny):
     size = nx * ny
     # Diagonal values
     main_diag = np.ones(size) * 0
-    off_diag = np.ones(size)*-0.5
-    # off_diag[nx-1::nx] = 0  # Set off-diagonal values to 0 for last column in each row
+    off_diag = np.ones(size) * -0.5
     off_diag2 = np.ones(size) * 0.5
     diagonals = [main_diag, off_diag, off_diag2]
     # Offsets for diagonals
     offsets = [0, -1, 1]
     grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
-    # Set ghost cells around the outside
-    grad_operator[0, 1] = 0
-    grad_operator[1, 0] = 0
-    grad_operator[size-2, size-1] = 0
-    grad_operator[size-1, size-2] = 0
+    for idx in range(0, size, nx):
+        grad_operator[idx,idx-1] = 0
+        grad_operator[idx,idx] = -1.5
+        grad_operator[idx,idx+1] = 2
+        grad_operator[idx,idx+2] = -0.5
+
+        grad_operator[idx-1,idx-3] = 0.5
+        grad_operator[idx-1,idx-2] = -2
+        grad_operator[idx-1,idx-1] = 1.5
+        grad_operator[idx-1,idx] = 0
     return grad_operator
 
-# Example usage
-nx = 20
-ny = 40
-utest = np.matrix(np.ones(ny).reshape(ny,1) @ np.linspace(0,nx-1,nx).reshape(1,nx))
-utest = np.pad(utest, (1, 1), mode="constant")
-utest
-create_grad_operator(nx, ny).toarray()
-op = create_grad_operator(nx, ny).toarray()
-(op@utest.reshape(nx*ny,1)).reshape(ny,nx)
+def test_grad_operator_y(nx, ny):
+    utest = np.random.rand(ny,nx)
+    op = create_grad_operator_y(nx, ny)
+    return (op @ utest.reshape((nx)*(ny),1)).reshape(ny,nx) == np.gradient(utest, axis=1, edge_order=2)
 
-utest.T.reshape(1,nx*ny)@np.gradient(np.eye(nx*ny), axis=0, edge_order=2)
-np.gradient()
 
-np.gradient(utest, axis=0, edge_order=2)
-print(laplacian.toarray())
+def create_grad_operator_x(nx, ny):
+    size = nx * ny
+    # Diagonal values
+    main_diag = np.ones(size) * 0
+    off_diag = np.ones(size) * -0.5
+    off_diag2 = np.ones(size) * 0.5
+    diagonals = [main_diag, off_diag, off_diag2]
+    # Offsets for diagonals
+    offsets = [0, -nx, nx]
+    grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
+    for idx in range(nx):
+        grad_operator[idx] = 0
+        grad_operator[idx, idx] = -1.5
+        grad_operator[idx, nx+idx] = 2
+        grad_operator[idx, 2*nx+idx] = -0.5
+        bc = size-1
+        grad_operator[bc - idx] = 0
+        grad_operator[bc - idx, bc - idx] = 1.5
+        grad_operator[bc - idx, bc - idx - nx] = -2
+        grad_operator[bc - idx, bc - idx - 2 * nx] = 0.5
+    return grad_operator
+
+
+def test_grad_operator_x(nx, ny):
+    utest = np.random.rand(ny,nx)
+    op = create_grad_operator_x(nx, ny)
+    return (op @ utest.reshape((nx)*(ny),1)).reshape(ny,nx) == np.gradient(utest, axis=0, edge_order=2)
+
+nx = 200
+ny = 400
+test_grad_operator_x(nx, ny)
+test_grad_operator_y(nx, ny)
+
+def create_laplacian_operator_x(nx, ny, dx=1):
+    size = nx * ny
+    # Diagonal values
+    main_diag = np.ones(size) * -2
+    off_diag = np.ones(size) * -1
+    off_diag2 = np.ones(size) * 1
+    diagonals = [main_diag, off_diag, off_diag2]
+    # Offsets for diagonals
+    offsets = [0, -nx, nx]
+    laplacian_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
+    for idx in range(0, nx):
+        laplacian_operator[idx] = 0
+        laplacian_operator[idx, idx] = 2
+        laplacian_operator[idx, nx+idx] = -5
+        laplacian_operator[idx, 2*nx+idx] = 4
+        laplacian_operator[idx, 3*nx+idx] = -1
+        bc = size-1
+        laplacian_operator[bc - idx] = 0
+        laplacian_operator[bc - idx, bc - idx] = -2
+        laplacian_operator[bc - idx, bc - idx - nx] = 5
+        laplacian_operator[bc - idx, bc - idx - 2 * nx] = -4
+        laplacian_operator[bc - idx, bc - idx - 3 * nx] = 1
+    return laplacian_operator/dx**2
 
 
 def compute_laplacian(q, dx, dy):
