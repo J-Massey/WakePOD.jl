@@ -18,10 +18,10 @@ plt.rcParams["font.size"] = "10.5"
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-u = u[::2, ::2, ::2]
+# u = u[::2, ::2, ::2]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-v = v[::2, ::2, ::2]
+# v = v[::2, ::2, ::2]
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
 T = 28  # number of cycles
@@ -108,7 +108,7 @@ flat_flucs = L[1].reshape(nx*ny, nt)
 fluc1 = flat_flucs[:, :-1]
 fluc2 = flat_flucs[:, 1:]
 
-k = 100
+k = 400
 # def fbDMD(fluc1,fluc2,k):
 # backwards
 U,Sigma,VT = np.linalg.svd(fluc2,full_matrices=False)
@@ -132,21 +132,22 @@ rho, W = np.linalg.eig(Atilde) # Step 3 - Eigenvalues
 
 Lambda = np.log(rho)/dt  # Spectral expansion
 
-# Phi = fluc2 @ np.linalg.solve(Sigmar.T,VTr).T @ W # Step 4 - Modes
-# alpha1 = Sigmar @ VTr[:,0]  # First mode POD
+Phi = fluc2 @ np.linalg.solve(Sigmar.T,VTr).T @ W # Step 4 - Modes
+alpha1 = Sigmar @ VTr[:,0]  # First mode POD
 # b = np.linalg.solve(W @ rho,alpha1)  # The mode amplitudes
+b = alpha1/(W @ rho)
 
-# # Let's trim some fat using the mode aplitudes
-# tol = 1e-10
-# large = abs(b)>tol*np.max(abs(b))
-# Phi = Phi[:,large]
-# Lambda =  Lambda[large]
+# Let's trim some fat using the mode aplitudes
+tol = 1e-6
+large = abs(b)>tol*np.max(abs(b))
+Phi = Phi[:,large]
+Lambda =  Lambda[large]
 
 # define the resolvant operator
-omegaSpan = np.linspace(0, 2, 100)
-gain = np.empty((omegaSpan.size, k))
+omegaSpan = np.linspace(-3, 3, 1000)
+gain = np.empty((omegaSpan.size, Lambda.size))
 for idx, omega in enumerate(omegaSpan):
-    R = np.linalg.svd(np.linalg.inv(-1j*omega*np.eye(k)-(Atilde)),
+    R = np.linalg.svd(np.linalg.inv(-1j*omega*np.eye(Lambda.size)-np.diag(Lambda)),
                       compute_uv=False)
     gain[idx] = R**2
 
