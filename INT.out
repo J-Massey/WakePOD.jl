@@ -1,37 +1,37 @@
-Running SLURM prolog script on gold61.cluster.local
+Running SLURM prolog script on ruby055.cluster.local
 ===============================================================================
-Job started on Tue Jul 11 10:07:14 BST 2023
-Job ID          : 3970162
+Job started on Wed Jul 12 15:11:34 BST 2023
+Job ID          : 3973784
 Job name        : SPOD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
-Partition       : highmem
+Partition       : amd
 Num hosts       : 1
 Num cores       : 64
 Num of tasks    : 64
-Hosts allocated : gold61
+Hosts allocated : ruby055
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Tue Jul 11 10:07:14 BST 2023
+Starting calculation at Wed Jul 12 15:11:34 BST 2023
 ---------------------------------------------------------------
-slurmstepd-gold61: error: *** JOB 3970162 ON gold61 CANCELLED AT 2023-07-11T15:36:41 ***
+slurmstepd-ruby055: error: *** JOB 3973784 ON ruby055 CANCELLED AT 2023-07-12T17:07:45 ***
 ==============================================================================
-Running epilogue script on gold61.
+Running epilogue script on ruby055.
 
-Submit time  : 2023-07-11T09:07:28
-Start time   : 2023-07-11T10:07:14
-End time     : 2023-07-11T15:36:41
-Elapsed time : 05:29:27 (Timelimit=08:00:00)
+Submit time  : 2023-07-12T15:03:06
+Start time   : 2023-07-12T15:11:33
+End time     : 2023-07-12T17:07:44
+Elapsed time : 01:56:11 (Timelimit=08:00:00)
 
-Job ID: 3970162
+Job ID: 3973784
 Cluster: i5
 User/Group: jmom1n15/mm
 State: CANCELLED (exit code 0)
 Nodes: 1
 Cores per node: 64
-CPU Utilized: 1-06:25:37
-CPU Efficiency: 8.66% of 14-15:24:48 core-walltime
-Job Wall-clock time: 05:29:27
-Memory Utilized: 1.35 TB
-Memory Efficiency: 93.95% of 1.44 TB
+CPU Utilized: 00:24:35
+CPU Efficiency: 0.33% of 5-03:55:44 core-walltime
+Job Wall-clock time: 01:56:11
+Memory Utilized: 204.90 GB
+Memory Efficiency: 91.06% of 225.00 GB
 

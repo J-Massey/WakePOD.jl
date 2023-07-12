@@ -18,10 +18,10 @@ plt.rcParams["font.size"] = "10.5"
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-# u = u[::2, ::2, ::2]
+u = u[::4, ::4, ::4]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-# v = v[::2, ::2, ::2]
+v = v[::4, ::4, ::4]
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
 T = 28  # number of cycles
@@ -97,6 +97,7 @@ def lns_operator(ubar, q, Re):
 Luprime = lns_operator(mean_field, flucs_field, 10250)
 
 print("Luprime done")
+Luprime[0, :,:,0].max()
 
 # Now visualise the two fields
 
@@ -106,9 +107,9 @@ lim=[0.00, 1.5]
 
 fig, ax = plt.subplots(figsize=(5, 4))
 levels = np.linspace(lim[0], lim[1], 44)
-_cmap = sns.color_palette("seismic", as_cmap=True)
+_cmap = sns.color_palette("icefire", as_cmap=True)
 
-cont = ax.contourf(pxs, pys, Luprime[:,:,0].T,
+cont = ax.contourf(pxs, pys, u[:, :, 0].T,
                             levels=levels,
                             vmin=lim[0],
                             vmax=lim[1],
@@ -120,5 +121,41 @@ cont = ax.contourf(pxs, pys, Luprime[:,:,0].T,
 ax.set_aspect(1)
 ax.set(xlabel=r"$x$", ylabel=r"$y$")
 
-plt.savefig("figures/opt_gain_DMD.pdf")
+plt.savefig("stationary/figures/Luprime.pdf")
 plt.close()
+
+# Now animate
+sec = u[0, :, :, :nt//8]
+fig, ax = plt.subplots(figsize=(5, 4))
+levels = np.linspace(lim[0], lim[1], 44)
+
+cont = ax.contourf(pxs, pys, sec[:, :, 0].T,
+                            levels=levels,
+                            vmin=lim[0],
+                            vmax=lim[1],
+                            # norm=norm,
+                            cmap=_cmap,
+                            extend="both",
+                        )
+
+ax.set_aspect(1)
+ax.set(xlabel=r"$x$", ylabel=r"$y$")#, title=r"$\phi_{" + str(m) + r"}$")
+
+
+def animate(i):
+    global cont
+    for c in cont.collections:
+        c.remove()
+    cont = plt.contourf(pxs, pys, sec[:,:,i].T,
+                            levels=levels,
+                            vmin=lim[0],
+                            vmax=lim[1],
+                            # norm=norm,
+                            cmap=_cmap,
+                            extend="both",
+                        )
+    return cont.collections
+
+anim = animation.FuncAnimation(fig, animate, frames=nt//4, interval=50, blit=True, repeat=False)
+
+anim.save(f"stationary/figures/Luprime.gif", fps=100, bitrate=-1, dpi=400)

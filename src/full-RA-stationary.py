@@ -70,16 +70,20 @@ def create_grad_operator_y(nx, ny, dy):
 
 
 def test_grad_operator_y(nx, ny):
-    x = np.linspace(0, 1, nx)**2
-    dy = np.diff(x).mean()
-    x1 = 2*np.linspace(0, 1, nx)
-    x2 = 2*np.ones(nx)
-    y = np.ones(ny)
-    utest = np.outer(y, x)
-    du = np.outer(y, x1)
-    du2 = np.outer(y, x2)
-    op = create_grad_operator_y(nx, ny, dy)
-    return np.isclose((op @ utest.reshape((nx)*(ny),1)).reshape(ny,nx), du)
+nx, ny = 3,4
+y = np.linspace(0, 1, ny)**2
+dy = np.diff(y).mean()
+y1 = 2*np.linspace(0, 1, ny)
+y2 = 2*np.ones(nx)
+x = np.ones(nx)
+utest = np.diag(np.outer(x, y).ravel())
+utest_diags = np.outer(x, y).ravel().reshape(nx*ny, 1)
+du = np.diag(np.outer(x, y1).ravel())
+op = create_grad_operator_y(nx, ny, dy)
+    return np.isclose((op * utest), du)
+
+op@utestdu
+test_grad_operator_y(20, 40)
 
 
 def create_grad_operator_x(nx, ny, dx):
