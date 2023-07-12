@@ -216,8 +216,6 @@ print("The memory size of numpy array arr is:",L.itemsize*L.size/1e9,"GB")
 
 
 
-
-
 np.save("data/stationary/10k/L.npy", L)
 # L = np.load("data/stationary/10k/L.npy")
 dim, nx, ny, fNt = L.shape
@@ -257,25 +255,5 @@ ax.loglog(omegaspan, np.array(Sigmav)[:,2])
 plt.savefig(f"./stationary/figures/gainv.pdf", dpi=600)
 plt.close()
 
-# # Test plot
-# fig, ax = plt.subplots(figsize=(5, 3))
-# lim = [-0.5, 0.5]
-# levels = np.linspace(lim[0], lim[1], 44)
-# _cmap = sns.color_palette("seismic", as_cmap=True)
-# cs = ax.contourf(
-#     pxs,
-#     pys,
-#     flatflucs[0, :].reshape(ny, nx),
-#     levels=levels,
-#     vmin=lim[0],
-#     vmax=lim[1],
-#     # norm=norm,
-#     cmap=_cmap,
-#     extend="both",
-# )
-# ax.set_aspect(1)
-# # ax.set_title(f"$\omega={frequencies_bsort[oms]:.2f},St={frequencies_bsort[oms]/(2*np.pi):.2f}$")
-# plt.savefig(f"./stationary/figures/testv100k.pdf", dpi=600)
-# plt.close()
 
 
