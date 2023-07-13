@@ -1,7 +1,7 @@
-Running SLURM prolog script on ruby055.cluster.local
+Running SLURM prolog script on ruby014.cluster.local
 ===============================================================================
-Job started on Wed Jul 12 15:11:34 BST 2023
-Job ID          : 3973784
+Job started on Thu Jul 13 11:51:47 BST 2023
+Job ID          : 3978968
 Job name        : SPOD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
@@ -9,29 +9,29 @@ Partition       : amd
 Num hosts       : 1
 Num cores       : 64
 Num of tasks    : 64
-Hosts allocated : ruby055
+Hosts allocated : ruby014
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Wed Jul 12 15:11:34 BST 2023
+Starting calculation at Thu Jul 13 11:51:47 BST 2023
 ---------------------------------------------------------------
-slurmstepd-ruby055: error: *** JOB 3973784 ON ruby055 CANCELLED AT 2023-07-12T17:07:45 ***
+slurmstepd-ruby014: error: *** JOB 3978968 ON ruby014 CANCELLED AT 2023-07-13T12:57:39 ***
 ==============================================================================
-Running epilogue script on ruby055.
+Running epilogue script on ruby014.
 
-Submit time  : 2023-07-12T15:03:06
-Start time   : 2023-07-12T15:11:33
-End time     : 2023-07-12T17:07:44
-Elapsed time : 01:56:11 (Timelimit=08:00:00)
+Submit time  : 2023-07-13T11:43:04
+Start time   : 2023-07-13T11:51:46
+End time     : 2023-07-13T12:57:39
+Elapsed time : 01:05:53 (Timelimit=08:00:00)
 
-Job ID: 3973784
+Job ID: 3978968
 Cluster: i5
 User/Group: jmom1n15/mm
 State: CANCELLED (exit code 0)
 Nodes: 1
 Cores per node: 64
-CPU Utilized: 00:24:35
-CPU Efficiency: 0.33% of 5-03:55:44 core-walltime
-Job Wall-clock time: 01:56:11
-Memory Utilized: 204.90 GB
-Memory Efficiency: 91.06% of 225.00 GB
+CPU Utilized: 00:00:01
+CPU Efficiency: 0.00% of 2-22:16:32 core-walltime
+Job Wall-clock time: 01:05:53
+Memory Utilized: 2.30 MB
+Memory Efficiency: 0.00% of 225.00 GB
 

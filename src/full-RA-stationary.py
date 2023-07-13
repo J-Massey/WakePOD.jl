@@ -19,11 +19,11 @@ plt.rcParams["font.size"] = "10.5"
 # u = np.load("data/stationary/10k/u.npy")
 # u = np.einsum("ijk -> kji", u)
 # u = u[::8, ::8, :250]
-u = np.random.rand(100,200,50)
+u = np.random.rand(20,30,50)
 # v = np.load("data/stationary/10k/v.npy")
 # v = np.einsum("ijk -> kji", v)
 # v = v[::8, ::8, :250]
-v = np.random.rand(100,200,50)
+v = np.random.rand(20,30,50)
 
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
@@ -56,34 +56,33 @@ def create_grad_operator_y(nx, ny, dy):
     # Offsets for diagonals
     offsets = [0, -1, 1]
     grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
-    for idx in range(0, size, nx):
-        grad_operator[idx,idx-1] = 0
-        grad_operator[idx,idx] = -1.5
-        grad_operator[idx,idx+1] = 2
-        grad_operator[idx,idx+2] = -0.5
-
-        grad_operator[idx-1,idx-3] = 0.5
-        grad_operator[idx-1,idx-2] = -2
-        grad_operator[idx-1,idx-1] = 1.5
-        grad_operator[idx-1,idx] = 0
+    for idx in range(nx):
+        grad_operator[idx*(ny),idx*(ny)-1] = 0
+        grad_operator[idx*(ny),idx*(ny)] = -1.5
+        grad_operator[idx*(ny),idx*(ny)+1] = 2
+        grad_operator[idx*(ny),idx*(ny)+2] = -0.5
+        grad_operator[-idx*(ny)-1, -idx*(ny)] = 0
+        grad_operator[-idx*(ny)-1, -idx*(ny)-1] = 1.5
+        grad_operator[-idx*(ny)-1, -idx*(ny)-2] = -2
+        grad_operator[-idx*(ny)-1, -idx*(ny)-3] = 0.5
     return grad_operator/dy
 
 
 def test_grad_operator_y(nx, ny):
-nx, ny = 3,4
-y = np.linspace(0, 1, ny)**2
-dy = np.diff(y).mean()
-y1 = 2*np.linspace(0, 1, ny)
-y2 = 2*np.ones(nx)
-x = np.ones(nx)
-utest = np.diag(np.outer(x, y).ravel())
-utest_diags = np.outer(x, y).ravel().reshape(nx*ny, 1)
-du = np.diag(np.outer(x, y1).ravel())
-op = create_grad_operator_y(nx, ny, dy)
-    return np.isclose((op * utest), du)
+    y = np.linspace(0, 1, ny)**2
+    dy = np.diff(y).mean()
+    y1 = 2*np.linspace(0, 1, ny)
+    x = np.ones(nx)
+    utest = np.outer(x, y).ravel().reshape(nx*ny, 1)
+    du = np.outer(x, y1).ravel().reshape(nx*ny, 1)
+    op = create_grad_operator_y(nx, ny, dy)
 
-op@utestdu
-test_grad_operator_y(20, 40)
+    utestrand = np.random.rand(nx, ny)
+    durand = np.gradient(utestrand, axis=1, edge_order=2)
+    oprand = create_grad_operator_y(nx, ny, 1)
+    return np.allclose((op @ utest), du), np.allclose((oprand @ utestrand.reshape(nx*ny, 1)).reshape(nx, ny), durand)
+
+test_grad_operator_y(nx, ny)
 
 
 def create_grad_operator_x(nx, ny, dx):
@@ -94,33 +93,28 @@ def create_grad_operator_x(nx, ny, dx):
     off_diag2 = np.ones(size) * 0.5
     diagonals = [main_diag, off_diag, off_diag2]
     # Offsets for diagonals
-    offsets = [0, -nx, nx]
+    offsets = [0, -ny, ny]
     grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
-    for idx in range(nx):
+    for idx in range(ny):
         grad_operator[idx] = 0
-        grad_operator[idx, idx] = -1.5
-        grad_operator[idx, nx+idx] = 2
-        grad_operator[idx, 2*nx+idx] = -0.5
+        grad_operator[idx,idx] = -1.5
+        grad_operator[idx,ny+idx] = 2
+        grad_operator[idx,2*ny+idx] = -0.5
         bc = size-1
         grad_operator[bc - idx] = 0
         grad_operator[bc - idx, bc - idx] = 1.5
-        grad_operator[bc - idx, bc - idx - nx] = -2
-        grad_operator[bc - idx, bc - idx - 2 * nx] = 0.5
+        grad_operator[bc - idx, bc - idx - ny] = -2
+        grad_operator[bc - idx, bc - idx - 2 * ny] = 0.5
     return grad_operator/dx
 
 
 def test_grad_operator_x(nx, ny):
-    x = np.linspace(0, 1, ny)**2
-    dy = np.diff(x).mean()
-    x1 = 2*np.linspace(0, 1, ny)
-    y = np.ones(nx)
-    utest = np.outer(x, y)
-    du = np.outer(x1, y)
-    op = create_grad_operator_x(nx, ny, dy)
-    return np.isclose((op @ utest.reshape((nx)*(ny),1)).reshape(ny,nx), du)
+    utestrand = np.random.rand(nx, ny)
+    durand = np.gradient(utestrand, axis=0, edge_order=2)
+    oprand = create_grad_operator_x(nx, ny, 1)
+    return np.allclose((oprand @ utestrand.reshape(nx*ny, 1)).reshape(nx, ny), durand)
 
 test_grad_operator_x(nx, ny)
-test_grad_operator_y(nx, ny)
 
 def create_laplacian_operator_y(nx, ny, dy=1):
     size = nx * ny
@@ -132,7 +126,7 @@ def create_laplacian_operator_y(nx, ny, dy=1):
     # Offsets for diagonals
     offsets = [0, -1, 1]
     laplacian = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
-    for idx in range(0, size, nx):
+    for idx in range(nx):
         laplacian[idx,idx-1] = 0
         laplacian[idx,idx] = 2
         laplacian[idx,idx+1] = -5
@@ -153,11 +147,13 @@ def test_laplacian_operator_y(nx, ny):
     x1 = 3*np.linspace(0, 1, nx)**2
     x2 = 6*np.linspace(0, 1, nx)
     y = np.ones(ny)
-    utest = np.outer(y, x)
-    du = np.outer(y, x1)
-    du2 = np.outer(y, x2)
+    utest = np.outer(x, y)
+    du = np.outer(x1, y)
+    du2 = np.outer(x2, y)
     op = create_laplacian_operator_y(nx, ny, dy)
-    return np.isclose((op @ utest.reshape((nx)*(ny),1)).reshape(ny,nx), du2)
+    return np.isclose((op @ utest.reshape((nx)*(ny),1)).reshape(nx,ny), du2)
+
+test_laplacian_operator_y(nx, ny)
 
 
 def create_laplacian_operator_x(nx, ny, dx=1):
@@ -168,36 +164,36 @@ def create_laplacian_operator_x(nx, ny, dx=1):
     off_diag2 = np.ones(size) * 1
     diagonals = [main_diag, off_diag, off_diag2]
     # Offsets for diagonals
-    offsets = [0, -nx, nx]
+    offsets = [0, -ny, ny]
     laplacian_operator = sp.diags(diagonals, offsets, shape=(size, size), format='csr')
-    for idx in range(0, nx):
+    for idx in range(ny):
         laplacian_operator[idx] = 0
         laplacian_operator[idx, idx] = 2
-        laplacian_operator[idx, nx+idx] = -5
-        laplacian_operator[idx, 2*nx+idx] = 4
-        laplacian_operator[idx, 3*nx+idx] = -1
+        laplacian_operator[idx, ny+idx] = -5
+        laplacian_operator[idx, 2*ny+idx] = 4
+        laplacian_operator[idx, 3*ny+idx] = -1
         bc = size-1
         laplacian_operator[bc - idx] = 0
         laplacian_operator[bc - idx, bc - idx] = 2
-        laplacian_operator[bc - idx, bc - idx - nx] = -5
-        laplacian_operator[bc - idx, bc - idx - 2 * nx] = 4
-        laplacian_operator[bc - idx, bc - idx - 3 * nx] = -1
+        laplacian_operator[bc - idx, bc - idx - ny] = -5
+        laplacian_operator[bc - idx, bc - idx - 2 * ny] = 4
+        laplacian_operator[bc - idx, bc - idx - 3 * ny] = -1
     return laplacian_operator/dx**2
 
 def test_laplacian_operator_x(nx, ny):
-    x = np.linspace(0, 1, ny)**3
+    x = np.linspace(0, 1, nx)**3
     dy = np.diff(x).mean()
-    x1 = 3*np.linspace(0, 1, ny)**2
-    x2 = 6*np.linspace(0, 1, ny)
-    y = np.ones(nx)
+    x1 = 3*np.linspace(0, 1, nx)**2
+    x2 = 6*np.linspace(0, 1, nx)
+    y = np.ones(ny)
     utest = np.outer(x, y)
     du = np.outer(x1, y)
     du2 = np.outer(x2, y)
     op = create_laplacian_operator_x(nx, ny, dy)
-    return np.isclose((op @ utest.reshape((nx)*(ny),1)).reshape(ny,nx), du2)
+    return np.isclose((op @ utest.reshape((nx)*(ny),1)).reshape(nx,ny), du2)
 
 test_laplacian_operator_x(nx, ny)
-test_laplacian_operator_y(nx, ny)
+test_laplacian_operator_y(nx, ny)    # This needs testing properly
 
 D1x = create_grad_operator_x(nx, ny, dx)
 D1y = create_grad_operator_y(nx, ny, dy)
@@ -205,9 +201,6 @@ D2x = create_laplacian_operator_x(nx, ny, dx)
 D2y = create_laplacian_operator_y(nx, ny, dy)
 I = sp.eye(nx*ny)
 Z = np.zeros((nx*ny, nx*ny))
-# Define Leray projection operator
-# Px = I - D1x@sp.linalg.spsolve(D2x, I)@D1x# Also singular
-# Py = I # - D1y@sp.linalg.spsolve(D2y, I)@D1y  # D2y is singular, so the inverse doesn't exist...
 Re = 10250
 
 # Block matrix L representing linearized NS equations
@@ -216,8 +209,9 @@ L1 = np.array([(np.diag(-flat_u_mean)+D2x/Re), np.diag(-D1x@flat_u_mean), Z])  #
 L2 = np.array([Z, (np.diag(-flat_v_mean)+D2y/Re), Z])  # v (rad.)
 L4 = np.array([-D1x.toarray(), -D1y.toarray(), Z])  #contin.
 L  = np.array([L1, L2, L4])
+u = np.linalg.svd(L, compute_uv=False)
 print("The memory size of numpy array arr is:",L.itemsize*L.size/1e9,"GB")
-
+L1@[:,:,0]
 
 
 np.save("data/stationary/10k/L.npy", L)
