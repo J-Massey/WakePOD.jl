@@ -96,6 +96,8 @@ def lns_operator(ubar, q, Re):
 
 Luprime = lns_operator(mean_field, flucs_field, 10250)
 
+np.save("stationary/Luprime.npy", Luprime)
+
 print("Luprime done")
 Luprime[0, :,:,0].max()
 

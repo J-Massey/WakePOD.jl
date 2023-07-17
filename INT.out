@@ -1,7 +1,7 @@
-Running SLURM prolog script on ruby014.cluster.local
+Running SLURM prolog script on ruby071.cluster.local
 ===============================================================================
-Job started on Thu Jul 13 11:51:47 BST 2023
-Job ID          : 3978968
+Job started on Mon Jul 17 10:32:47 BST 2023
+Job ID          : 4012624
 Job name        : SPOD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
@@ -9,29 +9,8 @@ Partition       : amd
 Num hosts       : 1
 Num cores       : 64
 Num of tasks    : 64
-Hosts allocated : ruby014
+Hosts allocated : ruby071
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Thu Jul 13 11:51:47 BST 2023
+Starting calculation at Mon Jul 17 10:32:47 BST 2023
 ---------------------------------------------------------------
-slurmstepd-ruby014: error: *** JOB 3978968 ON ruby014 CANCELLED AT 2023-07-13T12:57:39 ***
-==============================================================================
-Running epilogue script on ruby014.
-
-Submit time  : 2023-07-13T11:43:04
-Start time   : 2023-07-13T11:51:46
-End time     : 2023-07-13T12:57:39
-Elapsed time : 01:05:53 (Timelimit=08:00:00)
-
-Job ID: 3978968
-Cluster: i5
-User/Group: jmom1n15/mm
-State: CANCELLED (exit code 0)
-Nodes: 1
-Cores per node: 64
-CPU Utilized: 00:00:01
-CPU Efficiency: 0.00% of 2-22:16:32 core-walltime
-Job Wall-clock time: 01:05:53
-Memory Utilized: 2.30 MB
-Memory Efficiency: 0.00% of 225.00 GB
-
