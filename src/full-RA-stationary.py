@@ -29,7 +29,7 @@ p = p[::4, ::4, ::8]
 
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
-T = 7  # number of cycles
+T = 28  # number of cycles
 # T = 4
 
 dt = T / nt
@@ -147,7 +147,7 @@ def create_laplacian_operator_x(nx, ny, dx=1):
         laplacian_operator[bc - idx, bc - idx - ny] = -5
         laplacian_operator[bc - idx, bc - idx - 2 * ny] = 4
         laplacian_operator[bc - idx, bc - idx - 3 * ny] = -1
-    return laplacian_operator / dx**2
+    return laplacian_operator / (dx**2)
 
 
 def test_laplacian_operator_x(nx, ny):
@@ -168,7 +168,7 @@ test_laplacian_operator_x(nx, ny)
 # test_laplacian_operator_y(nx, ny)    # This needs testing properly
 
 
-def create_laplacian_operator_y(nx, ny, dy=1):
+def create_grad_operator_y(nx, ny, dy):
     size = nx * ny
     # Diagonal values
     main_diag = np.ones(size) * -2
@@ -177,106 +177,21 @@ def create_laplacian_operator_y(nx, ny, dy=1):
     diagonals = [main_diag, off_diag, off_diag2]
     # Offsets for diagonals
     offsets = [0, -1, 1]
-    laplacian = sp.diags(diagonals, offsets, shape=(size, size), format="csr")
+    grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format="csr")
     for idx in range(nx):
-        laplacian[idx, idx - 1] = 0
-        laplacian[idx, idx] = 2
-        laplacian[idx, idx + 1] = -5Luprime1 = (L1[0] @ flat_flucs[0, :, 0] + L1[1] @ flat_flucs[1, :, 0]).reshape(nx, ny)
-np.isclose(Luprime1, Luprime[0, :, :, 0])
+        grad_operator[idx * (ny), idx * (ny) - 1] = 0
+        grad_operator[idx * (ny), idx * (ny)] = 2
+        grad_operator[idx * (ny), idx * (ny) + 1] = -5
+        grad_operator[idx * (ny), idx * (ny) + 2] = 4
+        grad_operator[idx * (ny), idx * (ny) + 3] = -1
 
-flat_flucs.shape
+        grad_operator[-idx * (ny) - 1, -idx * (ny)] = 0
+        grad_operator[-idx * (ny) - 1, -idx * (ny) - 1] = 2
+        grad_operator[-idx * (ny) - 1, -idx * (ny) - 2] = -5
+        grad_operator[-idx * (ny) - 1, -idx * (ny) - 3] = 4
+        grad_operator[-idx * (ny) - 1, -idx * (ny) - 4] = -1
 
-
-def compute_laplacian(q, dx, dy):
-    # Extracting the dimensions
-    dim = 2
-
-    # Computing the Laplacian
-    laplacian = np.empty_like(q)
-
-    for d in range(dim):
-        laplacian[d] = np.gradient(
-            np.gradient(q[d], dx, axis=0, edge_order=2), dx, axis=0, edge_order=2
-        ) + np.gradient(
-            np.gradient(q[d], dy, axis=1, edge_order=2), dy, axis=1, edge_order=2
-        )
-
-    return laplacian
-
-
-# This is
-compute_laplacian(flucs_field, dx, dy)[0]
-(LAP @ flat_flucs[0]).reshape(nx, ny, nt)
-
-gop = (D1x @ (D1x @ flat_flucs[0]) + D1y @ (D1y @ flat_flucs[0])).reshape(nx, ny, nt)
-np.isclose(compute_laplacian(flucs_field, dx, dy)[0], gop)
-
-test = np.random.rand(nx, ny, nt)
-d2x = np.gradient(
-    np.gradient(flucs_field[0], dx, axis=0, edge_order=2), dx, axis=0, edge_order=2
-)
-d2y = np.gradient(
-    np.gradient(flucs_field[0], dy, axis=1, edge_order=2), dy, axis=1, edge_order=2
-)
-od2x = (D1x @ (D1x @ flat_flucs[0])).reshape(nx, ny, nt)
-od2y = (D1y @ (D1y @ flat_flucs[0])).reshape(nx, ny, nt)
-np.isclose(od2y, d2y)
-
-d1y = np.gradient(flucs_field[0], dy, axis=1, edge_order=2)
-
-
-def grad(q, dx, dy):
-    # Extracting the dimensions
-    dim = 2
-    dd = [dx, dy]
-    # Computing the Laplacian
-    grad = np.empty_like(q)
-
-    for d in range(dim):
-        grad[d] = np.gradient(q[d], dd[d], axis=d, edge_order=2)
-
-    return grad
-
-
-def lns_operator(ubar, q, Re):
-    # Extracting the dimensions
-    dim, nt, ny, nx = q.shape
-
-    dot_product1 = -(np.flip(ubar, axis=0) * grad(q, dx, dy)).sum(axis=0)
-    dot_product2 = -(np.flip(q, axis=0) * grad(ubar, dx, dy)).sum(axis=0)
-
-    # Compute the Laplacian of u_bar as the second derivatives
-    laplacian = compute_laplacian(q, dx, dy)
-    operator = np.empty_like(q)
-    for d in range(dim):
-        operator[d] = dot_product1 + dot_product2 + 1 / Re * laplacian[d]
-    return operator
-
-
-Luprime = lns_operator(
-    np.repeat(means.reshape(2, nx, ny, 1), nt, axis=3), flucs_field, 10250
-)
-# Luprime = np.load("stationary/Luprime.npy")
-
-
-# np.save("data/stationary/10k/L.npy", L)
-# # L = np.load("data/stationary/10k/L.npy")
-# dim, nx, ny, fNt = L.shape
-# Lflat = L.reshape(2, nx*ny, fNt)
-
-
-# # np.save("data/stationary/10k/fft_velocity.npy", fft_flucs)
-# # Lflatfftu = fft(Lflat[0].T)
-# # Lflatfftv = fft(Lflat[1].T)
-        laplacian[idx, idx + 2] = 4
-        laplacian[idx, idx + 3] = -1
-
-        laplacian[idx - 1, idx - 4] = -1
-        laplacian[idx - 1, idx - 3] = 4
-        laplacian[idx - 1, idx - 2] = -5
-        laplacian[idx - 1, idx - 1] = 2
-        laplacian[idx - 1, idx] = 0
-    return laplacian / dy**2
+    return grad_operator / (dy**2)
 
 
 def test_laplacian_operator_y(nx, ny):
