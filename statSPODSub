@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --ntasks=128
-#SBATCH --nodes=2
-#SBATCH --partition=highmem
+#SBATCH --ntasks=256
+#SBATCH --nodes=4
+#SBATCH --partition=amd
 #SBATCH --job-name=SPOD
 #SBATCH --time=7:00:00
 #SBATCH --output=STILL.out

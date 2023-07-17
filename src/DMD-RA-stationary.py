@@ -2,7 +2,7 @@ import numpy as np
 from lotusvis.spod import spod
 from scipy.fft import fft, ifft, fftfreq
 import scipy.sparse as sp
-from src.fft_wrapper import fft_wrapper
+# from src.fft_wrapper import fft_wrapper
 import h5py
 import os
 from tqdm import tqdm
@@ -24,7 +24,7 @@ v = np.einsum("ijk -> kji", v)
 # v = v[::2, ::2, ::2]
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
-T = 28  # number of cycles
+T = 7  # number of cycles
 dt = T / nt
 pxs = np.linspace(*xlims, nx)
 dx = np.diff(pxs).mean()
@@ -104,7 +104,7 @@ def lns_operator(ubar, q, Re):
 L = lns_operator(mean_field, flucs_field, 10250)
 
 # Define inputs for DMD on the vertical velocity
-flat_flucs = L[1].reshape(nx*ny, nt)
+flat_flucs = v.reshape(nx*ny, nt)
 fluc1 = flat_flucs[:, :-1]
 fluc2 = flat_flucs[:, 1:]
 
@@ -160,5 +160,5 @@ ax.set_ylabel(r"$\sigma_j$")
 for i in range(0,4):
     ax.plot(omegaSpan, np.sqrt(gain[:, i]))
 
-plt.savefig("figures/opt_gain_DMD.pdf")
+plt.savefig("stationary/figures/opt_gain_DMD.pdf")
 plt.close()

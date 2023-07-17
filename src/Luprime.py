@@ -22,6 +22,9 @@ u = u[::4, ::4, ::4]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
 v = v[::4, ::4, ::4]
+p = np.load("data/stationary/10k/p.npy")
+p = np.einsum("ijk -> kji", p)
+p = p[::4, ::4, ::4]
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
 T = 28  # number of cycles
@@ -105,13 +108,13 @@ Luprime[0, :,:,0].max()
 
 
 fig, ax = plt.subplots(figsize = (3,3))
-lim=[0.00, 1.5]
+lim=[-0.4, 0.4]
 
 fig, ax = plt.subplots(figsize=(5, 4))
 levels = np.linspace(lim[0], lim[1], 44)
-_cmap = sns.color_palette("icefire", as_cmap=True)
+_cmap = sns.color_palette("seismic", as_cmap=True)
 
-cont = ax.contourf(pxs, pys, u[:, :, 0].T,
+cont = ax.contourf(pxs, pys, p[:, :, -1].T,
                             levels=levels,
                             vmin=lim[0],
                             vmax=lim[1],
@@ -123,11 +126,11 @@ cont = ax.contourf(pxs, pys, u[:, :, 0].T,
 ax.set_aspect(1)
 ax.set(xlabel=r"$x$", ylabel=r"$y$")
 
-plt.savefig("stationary/figures/Luprime.pdf")
+plt.savefig("stationary/figures/p.pdf")
 plt.close()
 
 # Now animate
-sec = u[0, :, :, :nt//8]
+sec = u[:, :, :]
 fig, ax = plt.subplots(figsize=(5, 4))
 levels = np.linspace(lim[0], lim[1], 44)
 
@@ -158,6 +161,6 @@ def animate(i):
                         )
     return cont.collections
 
-anim = animation.FuncAnimation(fig, animate, frames=nt//4, interval=50, blit=True, repeat=False)
+anim = animation.FuncAnimation(fig, animate, frames=nt, interval=30, blit=True, repeat=False)
 
-anim.save(f"stationary/figures/Luprime.gif", fps=100, bitrate=-1, dpi=400)
+anim.save(f"stationary/figures/u.gif", fps=50, bitrate=-1, dpi=400)

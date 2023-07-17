@@ -11,11 +11,11 @@ plt.style.use(["science"])
 plt.rcParams["font.size"] = "10.5"
 
 flow = np.load("data/stationary/10k/v.npy")
-flow  = flow[::4, :, :]
+# flow  = flow[:, :, :]
 print("Loaded")
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nt, ny, nx = flow.shape
-T = 28  # number of cycles
+T = 7  # number of cycles
 dt = T / nt
 pxs = np.linspace(*xlims, nx)
 pys = np.linspace(*ylims, ny)

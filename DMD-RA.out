@@ -1,0 +1,37 @@
+Running SLURM prolog script on ruby032.cluster.local
+===============================================================================
+Job started on Mon Jul 17 11:49:47 BST 2023
+Job ID          : 4012977
+Job name        : animate
+WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
+Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/genSub
+Partition       : amd
+Num hosts       : 8
+Num cores       : 512
+Num of tasks    : 512
+Hosts allocated : ruby[032,034,037-042]
+Job Output Follows ...
+===============================================================================
+Starting calculation at Mon Jul 17 11:49:47 BST 2023
+---------------------------------------------------------------
+/tmp/slurmd/job4012977/slurm_script: line 21: 19568 Killed                  python src/DMD-RA-stationary.py
+==============================================================================
+Running epilogue script on ruby032.
+
+Submit time  : 2023-07-17T11:49:35
+Start time   : 2023-07-17T11:49:47
+End time     : 2023-07-17T11:54:34
+Elapsed time : 00:04:47 (Timelimit=01:00:00)
+
+Job ID: 4012977
+Cluster: i5
+User/Group: jmom1n15/mm
+State: FAILED (exit code 137)
+Nodes: 8
+Cores per node: 64
+CPU Utilized: 00:03:49
+CPU Efficiency: 0.16% of 1-16:49:04 core-walltime
+Job Wall-clock time: 00:04:47
+Memory Utilized: 224.56 GB
+Memory Efficiency: 12.48% of 1.76 TB
+
