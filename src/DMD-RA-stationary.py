@@ -14,38 +14,49 @@ import scienceplots
 import matplotlib.animation as animation
 plt.style.use(["science"])
 plt.rcParams["font.size"] = "10.5"
+plt.rcParams["image.cmap"] = "gist_earth"
+plt.rcParams['lines.markersize']='o'
 
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-# u = u[::2, ::2, ::2]
+u = u[::8, ::8, ::4]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-# v = v[::2, ::2, ::2]
+v = v[::8, ::8, ::4]
+p = np.load("data/stationary/10k/p.npy")
+p = np.einsum("ijk -> kji", p)
+p = p[::8, ::8, ::4]
+
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
 T = 7  # number of cycles
+# T = 4
+
 dt = T / nt
 pxs = np.linspace(*xlims, nx)
 dx = np.diff(pxs).mean()
 pys = np.linspace(*ylims, ny)
 dy = np.diff(pys).mean()
 
-print("Loaded fields done")
-
 # Reynolds decomposition
 u_flucs = np.empty_like(u)
 v_flucs = np.empty_like(v)
+p_flucs = np.empty_like(p)
 u_mean = u.mean(axis=2)
 v_mean = v.mean(axis=2)
+p_mean = p.mean(axis=2)
 for t in range(nt):
-    u_flucs[:,:,t] = u[:, :, t] - u_mean
-    v_flucs[:,:,t] = v[:, :, t] - v_mean
+    u_flucs[:, :, t] = u[:, :, t] - u_mean
+    v_flucs[:, :, t] = v[:, :, t] - v_mean
+    p_flucs[:, :, t] = p[:, :, t] - p_mean
 
 print("Flucs done")
 
-means = np.array([u_mean, v_mean])
-flucs_field = np.array([u_flucs, v_flucs])
+means = np.array([u_mean, v_mean, p_mean])
+flucs_field = np.array([u_flucs, v_flucs, p_flucs])
+flat_mean_field = means.reshape(3, nx * ny)
+flat_flucs = flucs_field.reshape(3, nx * ny, nt)
 # flat_flucs = flucs_field.reshape(2, nx*ny, nt)
 # flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
 # flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
@@ -56,33 +67,42 @@ mean_field = np.repeat(means.reshape(2, nx, ny, 1), nt, axis=3)
 print("FFT done")
 
 # Define inputs for DMD on the vertical velocity
-flat_flucs = v.reshape(nx*ny, nt)
+flat_flucs.resize(3*nx*ny, nt)
 fluc1 = flat_flucs[:, :-1]
 fluc2 = flat_flucs[:, 1:]
 
-k = 400
+k = 200
 # def fbDMD(fluc1,fluc2,k):
 # backwards
-U,Sigma,VT = np.linalg.svd(fluc2,full_matrices=False)
-# Sigma_plot(Sigma)
-Ur = U[:,:k]
-Sigmar = np.diag(Sigma[:k])
-VTr = VT[:k,:]
-Atildeb = np.linalg.solve(Sigmar.T,(Ur.T @ fluc1 @ VTr.T).T).T
+# U,Sigma,VT = np.linalg.svd(fluc2,full_matrices=False)
+# # Sigma_plot(Sigma)
+# Ur = U[:,:k]
+# Sigmar = np.diag(Sigma[:k])
+# VTr = VT[:k,:]
+# Atildeb = np.linalg.solve(Sigmar.T,(Ur.T @ fluc1 @ VTr.T).T).T
 #forwards
 U,Sigma,VT = np.linalg.svd(fluc1,full_matrices=False) # Step 1 - SVD, init
 # Sigma_plot(Sigma)
 Ur = U[:,:k]
 Sigmar = np.diag(Sigma[:k])
 VTr = VT[:k,:]
-Atildef = np.linalg.solve(Sigmar.T,(Ur.T @ fluc2 @ VTr.T).T).T # Step 2 - Find the linear operator using psuedo inverse
-Atilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
+Atilde = np.linalg.solve(Sigmar.T,(Ur.T @ fluc2 @ VTr.T).T).T # Step 2 - Find the linear operator using psuedo inverse
+# Atilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
 # I think we're good up to here...
 
 rho, W = np.linalg.eig(Atilde) # Step 3 - Eigenvalues
 # Wadj = np.conjugate(W).T
 
 Lambda = np.log(rho)/dt  # Spectral expansion
+
+fig, ax = plt.subplots(figsize = (3,3))
+# ax.set_yscale('log')
+ax.set_xlabel(r"$\Im \lambda_i$")
+ax.set_ylabel(r"$\Re \lambda_i$")
+# ax.set_xlim(0, 10)
+ax.scatter(Lambda.imag, Lambda.real, s=2)
+plt.savefig("stationary/figures/Lambda.pdf")
+plt.close()
 
 Phi = fluc2 @ np.linalg.solve(Sigmar.T,VTr).T @ W # Step 4 - Modes
 alpha1 = Sigmar @ VTr[:,0]  # First mode POD

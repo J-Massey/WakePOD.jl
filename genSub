@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH --ntasks=512
-#SBATCH --nodes=8
+#SBATCH --ntasks=256
+#SBATCH --nodes=4
 # SBATCH --mem=378240
-#SBATCH --partition=amd
+#SBATCH --partition=highmem
 #SBATCH --job-name=animate
-#SBATCH --time=01:00:00
+#SBATCH --time=31:00:00
 #SBATCH --output=DMD-RA.out
 # SBATCH --exclude=ruby035,ruby036,ruby037
 # SBATCH --dependency=afterok:1908224
@@ -17,5 +17,6 @@ module purge
 # module load openmpi/4.0.5/amd
 module load conda
 source activate an
+module load texlive
 
-python src/DMD-RA-stationary.py
+python src/full-RA-stationary.py

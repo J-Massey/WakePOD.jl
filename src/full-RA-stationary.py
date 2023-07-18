@@ -19,13 +19,13 @@ plt.rcParams["font.size"] = "10.5"
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-u = u[::16, ::16, ::32]
+u = u[::8, ::8, ::8]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-v = v[::16, ::16, ::32]
+v = v[::8, ::8, ::8]
 p = np.load("data/stationary/10k/p.npy")
 p = np.einsum("ijk -> kji", p)
-p = p[::16, ::16, ::32]
+p = p[::8, ::8, ::8]
 
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
@@ -216,7 +216,7 @@ L2_big = np.concatenate(
 
 L3_big = np.concatenate((D1x.toarray(), D1y.toarray(), Z), axis=1)
 
-L4_big = np.concatenate((D1y.toarray(), D1y.toarray(), Z), axis=1)
+# L4_big = np.concatenate((D1y.toarray(), D1y.toarray(), Z), axis=1)
 
 L_big = np.concatenate((L1_big, L2_big, L3_big), axis=0)
 print("The memory size of numpy array arr is:", L_big.itemsize * L_big.size / 1e9, "GB")
@@ -303,24 +303,17 @@ anim.save(f"stationary/figures/test_u.gif", fps=5, bitrate=-1, dpi=400)
 omegaspan = np.linspace(1,20*np.pi)
 Sigma =[]
 for omega in tqdm(omegaspan):
-    H = (1j*omega*np.eye(L_big.shape[0])- L_big)
+    H = np.linalg.inv(1j*omega*np.eye(L_big.shape[0])- L_big)
     S = np.linalg.svd(H, compute_uv=False)
     Sigma.append(S)
-    # Phi.append(Ph)
-    # Psi.append(Ps)
-
-np.save("data/stationary/10k/Sigmau.npy", np.array(Sigmau))
-omegaspan = np.linspace(0,20*np.pi)
-Sigmau = np.load("data/stationary/10k/Sigmau.npy")
-Sigmav = np.load("data/stationary/10k/Sigmav.npy")
 
 fig, ax = plt.subplots(figsize=(3, 3))
 # ax.set_yscale("log")
 ax.set_xlabel(r"$\omega$")
 ax.set_ylabel(r"$\sigma_u$")
-ax.loglog(omegaspan, np.array(Sigmav)[:,0])
-ax.loglog(omegaspan, np.array(Sigmav)[:,1])
-ax.loglog(omegaspan, np.array(Sigmav)[:,2])
+ax.loglog(omegaspan, np.array(Sigma)[:,0])
+ax.loglog(omegaspan, np.array(Sigma)[:,1])
+ax.loglog(omegaspan, np.array(Sigma)[:,2])
 
-plt.savefig(f"./stationary/figures/gainv.pdf", dpi=600)
+plt.savefig(f"./stationary/figures/fullRAgain.pdf", dpi=600)
 plt.close()
