@@ -3,7 +3,7 @@
 #SBATCH --ntasks=64
 #SBATCH --nodes=1
 #SBATCH --partition=amd
-#SBATCH --job-name=SPOD
+#SBATCH --job-name=DMD
 #SBATCH --time=8:00:00
 #SBATCH --output=INT.out
 # SBATCH --exclusive

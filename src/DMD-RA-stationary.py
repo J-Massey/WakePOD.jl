@@ -55,54 +55,6 @@ mean_field = np.repeat(means.reshape(2, nx, ny, 1), nt, axis=3)
 
 print("FFT done")
 
-def compute_laplacian(q, dx, dy):
-    # Extracting the dimensions
-    dim = 2
-    
-    # Computing the Laplacian
-    laplacian = np.empty_like(q)
-    
-    for d in range(dim):
-        laplacian[d] = np.gradient(
-            np.gradient(q[d], dx, axis=0, edge_order=2),
-            dx, axis=0, edge_order=2
-        ) + np.gradient(
-            np.gradient(q[d], dy, axis=1, edge_order=2),
-            dy, axis=1, edge_order=2
-        )
-    
-    return laplacian
-
-def grad(q, dx, dy):
-    # Extracting the dimensions
-    dim = 2
-    dd = [dx, dy]
-    # Computing the Laplacian
-    grad = np.empty_like(q)
-    
-    for d in range(dim):
-        grad[d] = np.gradient(q[d], dd[d], axis=d, edge_order=2)
-    
-    return grad
-
-
-def lns_operator(ubar, q, Re):
-    # Extracting the dimensions
-    dim, nt, ny, nx = q.shape
-    
-    dot_product1 = -(np.flip(ubar, axis=0) * grad(q, dx, dy)).sum(axis=0)
-    dot_product2 = -(np.flip(q, axis=0) * grad(ubar, dx, dy)).sum(axis=0)
-        
-    # Compute the Laplacian of u_bar as the second derivatives
-    laplacian = compute_laplacian(q, dx, dy)
-    operator = np.empty_like(q)
-    for d in range(dim):
-        operator[d] = dot_product1 + dot_product2\
-        + 1/Re * laplacian[d]
-    return operator
-
-L = lns_operator(mean_field, flucs_field, 10250)
-
 # Define inputs for DMD on the vertical velocity
 flat_flucs = v.reshape(nx*ny, nt)
 fluc1 = flat_flucs[:, :-1]

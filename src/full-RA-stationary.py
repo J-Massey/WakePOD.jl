@@ -19,17 +19,17 @@ plt.rcParams["font.size"] = "10.5"
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-u = u[::4, ::4, ::8]
+u = u[::16, ::16, ::32]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-v = v[::4, ::4, ::8]
+v = v[::16, ::16, ::32]
 p = np.load("data/stationary/10k/p.npy")
 p = np.einsum("ijk -> kji", p)
-p = p[::4, ::4, ::8]
+p = p[::16, ::16, ::32]
 
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
-T = 28  # number of cycles
+T = 7  # number of cycles
 # T = 4
 
 dt = T / nt
@@ -150,25 +150,7 @@ def create_laplacian_operator_x(nx, ny, dx=1):
     return laplacian_operator / (dx**2)
 
 
-def test_laplacian_operator_x(nx, ny):
-    x = np.linspace(0, 1, nx) ** 3
-    dy = np.diff(x).mean()
-    x1 = 3 * np.linspace(0, 1, nx) ** 2
-    x2 = 6 * np.linspace(0, 1, nx)
-    y = np.ones(ny)
-    utest = np.outer(x, y)
-    du = np.outer(x1, y)
-    du2 = np.outer(x2, y)
-    op = create_laplacian_operator_x(nx, ny, dy)
-    bool = np.isclose((op @ utest.reshape((nx) * (ny), 1)).reshape(nx, ny), du2)
-    return bool
-
-
-test_laplacian_operator_x(nx, ny)
-# test_laplacian_operator_y(nx, ny)    # This needs testing properly
-
-
-def create_grad_operator_y(nx, ny, dy):
+def create_laplacian_operator_y(nx, ny, dy):
     size = nx * ny
     # Diagonal values
     main_diag = np.ones(size) * -2
@@ -184,13 +166,11 @@ def create_grad_operator_y(nx, ny, dy):
         grad_operator[idx * (ny), idx * (ny) + 1] = -5
         grad_operator[idx * (ny), idx * (ny) + 2] = 4
         grad_operator[idx * (ny), idx * (ny) + 3] = -1
-
         grad_operator[-idx * (ny) - 1, -idx * (ny)] = 0
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 1] = 2
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 2] = -5
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 3] = 4
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 4] = -1
-
     return grad_operator / (dy**2)
 
 
@@ -207,47 +187,14 @@ def test_laplacian_operator_y(nx, ny):
     return np.isclose((op @ utest.reshape((nx) * (ny), 1)).reshape(nx, ny), du2)
 
 
-# test_laplacian_operator_y(nx, ny)
-
-
 D1x = create_grad_operator_x(nx, ny, dx)
 D1y = create_grad_operator_y(nx, ny, dy)
-# Retest the gradient operators
-np.isclose(
-    (D1y @ flat_flucs[0]).reshape(nx, ny, nt),
-    np.gradient(flucs_field[0], dy, axis=1, edge_order=2),
-)
-
 D2x = create_laplacian_operator_x(nx, ny, dx)
 D2y = create_laplacian_operator_y(nx, ny, dy)
 LAP = D2x + D2y
 I = sp.eye(nx * ny)
 Z = np.zeros((nx * ny, nx * ny))
 Re = 10250
-
-# Block matrix L representing linearized NS equations
-# The last column is the pressure, last 2 rows are continuity
-L1 = np.array(
-    [
-        (np.diag(-flat_mean_field[1] @ D1x) + LAP / Re),
-        np.diag(-D1x @ flat_mean_field[0]),
-        -D1x.toarray(),
-    ]
-)  # u (ax.)
-L2 = np.array(
-    [
-        np.diag(-D1y @ flat_mean_field[1]),
-        (np.diag(-flat_mean_field[0] @ D1y) + LAP / Re),
-        -D1y.toarray(),
-    ]
-)  # v (rad.)
-L3 = np.array([D1x.toarray(), D1x.toarray(), Z])  # continuity x
-L4 = np.array([D1y.toarray(), D1y.toarray(), Z])  # continuity y
-L = np.array([L1, L2, L3, L4])
-print("The memory size of numpy array arr is:", L.itemsize * L.size / 1e9, "GB")
-Lq = (L @ flat_flucs).sum(
-    axis=0
-)  # Should't have to sum this for a matrix operation but looks alright
 
 L1_big = np.concatenate(
     (
@@ -267,27 +214,28 @@ L2_big = np.concatenate(
     axis=1,
 )
 
-L3_big = np.concatenate((D1x.toarray(), D1x.toarray(), Z), axis=1)
+L3_big = np.concatenate((D1x.toarray(), D1y.toarray(), Z), axis=1)
 
 L4_big = np.concatenate((D1y.toarray(), D1y.toarray(), Z), axis=1)
 
-L1_big.shape
-L_big = np.concatenate((L1_big, L2_big, L3_big, L4_big), axis=0)
-L_big.shape
-big_flucs = flat_flucs.reshape(3 * nx * ny, nt)#.repeat(3, axis=0)
-big_flucs.shape
-Lq = (L_big @ big_flucs)
+L_big = np.concatenate((L1_big, L2_big, L3_big), axis=0)
+print("The memory size of numpy array arr is:", L_big.itemsize * L_big.size / 1e9, "GB")
 
+big_flucs = flat_flucs.reshape(3 * nx * ny, nt)#.repeat(3, axis=0)
+L_big.shape, big_flucs.shape
+
+Lq = (L_big @ big_flucs)
 # Test the product with the discrete operator
 # Reshape Lq
-Lq_reshaped = (Lq.reshape(3, nx*ny, nt)).reshape(nx, ny, nt)
+Lq.resize(3, nx*ny, nt)
+Lq.resize(3, nx, ny, nt)
 
-lim = [-10, 10]
+lim = [-1, 1]
 fig, ax = plt.subplots(figsize=(5, 4))
 levels = np.linspace(lim[0], lim[1], 44)
 _cmap = sns.color_palette("seismic", as_cmap=True)
 
-te_field = Lq_reshaped[0, :, :, :]
+te_field = Lq[0, :, :, :]
 
 cont = ax.contourf(
     pxs,
@@ -307,7 +255,7 @@ ax.set(xlabel=r"$x$", ylabel=r"$y$")
 plt.savefig("stationary/figures/test_u.pdf")
 plt.close()
 
-sec = Lq[2, :, :].reshape(nx, ny, nt)
+sec = te_field
 fig, ax = plt.subplots(figsize=(5, 4))
 levels = np.linspace(lim[0], lim[1], 44)
 
@@ -349,35 +297,30 @@ anim = animation.FuncAnimation(
     fig, animate, frames=nt, interval=30, blit=True, repeat=False
 )
 
-anim.save(f"stationary/figures/test_p.gif", fps=5, bitrate=-1, dpi=400)
+anim.save(f"stationary/figures/test_u.gif", fps=5, bitrate=-1, dpi=400)
 
 
+omegaspan = np.linspace(1,20*np.pi)
+Sigma =[]
+for omega in tqdm(omegaspan):
+    H = (1j*omega*np.eye(L_big.shape[0])- L_big)
+    S = np.linalg.svd(H, compute_uv=False)
+    Sigma.append(S)
+    # Phi.append(Ph)
+    # Psi.append(Ps)
 
-# omegaspan = np.linspace(1,20*np.pi)
-# Sigmau, Sigmav = [], []
-# for omega in tqdm(omegaspan):
-#     H = 1/(1j*omega- Lflat[0])
-#     S = np.linalg.svd(H, compute_uv=False)
-#     Sigmau.append(S)
-#     H = 1/(1j*omega- Lflat[1])
-#     S = np.linalg.svd(H, compute_uv=False)
-#     Sigmav.append(S)
-#     # Phi.append(Ph)
-#     # Psi.append(Ps)
+np.save("data/stationary/10k/Sigmau.npy", np.array(Sigmau))
+omegaspan = np.linspace(0,20*np.pi)
+Sigmau = np.load("data/stationary/10k/Sigmau.npy")
+Sigmav = np.load("data/stationary/10k/Sigmav.npy")
 
-# np.save("data/stationary/10k/Sigmau.npy", np.array(Sigmau))
-# np.save("data/stationary/10k/Sigmav.npy", np.array(Sigmav))
-# omegaspan = np.linspace(0,20*np.pi)
-# Sigmau = np.load("data/stationary/10k/Sigmau.npy")
-# Sigmav = np.load("data/stationary/10k/Sigmav.npy")
+fig, ax = plt.subplots(figsize=(3, 3))
+# ax.set_yscale("log")
+ax.set_xlabel(r"$\omega$")
+ax.set_ylabel(r"$\sigma_u$")
+ax.loglog(omegaspan, np.array(Sigmav)[:,0])
+ax.loglog(omegaspan, np.array(Sigmav)[:,1])
+ax.loglog(omegaspan, np.array(Sigmav)[:,2])
 
-# fig, ax = plt.subplots(figsize=(3, 3))
-# # ax.set_yscale("log")
-# ax.set_xlabel(r"$\omega$")
-# ax.set_ylabel(r"$\sigma_u$")
-# ax.loglog(omegaspan, np.array(Sigmav)[:,0])
-# ax.loglog(omegaspan, np.array(Sigmav)[:,1])
-# ax.loglog(omegaspan, np.array(Sigmav)[:,2])
-
-# plt.savefig(f"./stationary/figures/gainv.pdf", dpi=600)
-# plt.close()
+plt.savefig(f"./stationary/figures/gainv.pdf", dpi=600)
+plt.close()
