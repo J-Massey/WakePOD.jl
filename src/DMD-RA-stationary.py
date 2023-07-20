@@ -1,5 +1,5 @@
 import numpy as np
-from lotusvis.spod import spod
+from scipy.linalg import svd, cholesky
 from scipy.fft import fft, ifft, fftfreq
 import scipy.sparse as sp
 # from src.fft_wrapper import fft_wrapper
@@ -15,27 +15,29 @@ import matplotlib.animation as animation
 plt.style.use(["science"])
 plt.rcParams["font.size"] = "10.5"
 plt.rcParams["image.cmap"] = "gist_earth"
-plt.rcParams['lines.markersize']='o'
 
 
-u = np.load("data/stationary/10k/u.npy")
-u = np.einsum("ijk -> kji", u)
-u = u[::8, ::8, ::4]
-v = np.load("data/stationary/10k/v.npy")
-v = np.einsum("ijk -> kji", v)
-v = v[::8, ::8, ::4]
-p = np.load("data/stationary/10k/p.npy")
-p = np.einsum("ijk -> kji", p)
-p = p[::8, ::8, ::4]
+def load_and_process_data(filepath):
+    data = np.load(filepath)
+    data = np.einsum("ijk -> kji", data)
+    return data[::2, ::2, :]
+
+# Define the slicing pattern as a variable for clarity
+slice_pattern = (slice(None, None, 2), slice(None, None, 2), slice(None, None, 4))
+
+u = load_and_process_data("data/stationary/10k/u.npy")
+v = load_and_process_data("data/stationary/10k/v.npy")
+p = load_and_process_data("data/stationary/10k/p.npy")
 
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
-T = 7  # number of cycles
-# T = 4
 
+T = 7  # number of cycles
 dt = T / nt
+
 pxs = np.linspace(*xlims, nx)
 dx = np.diff(pxs).mean()
+
 pys = np.linspace(*ylims, ny)
 dy = np.diff(pys).mean()
 
@@ -53,16 +55,10 @@ for t in range(nt):
 
 print("Flucs done")
 
-means = np.array([u_mean, v_mean, p_mean])
+# means = np.array([u_mean, v_mean, p_mean])
 flucs_field = np.array([u_flucs, v_flucs, p_flucs])
-flat_mean_field = means.reshape(3, nx * ny)
+# flat_mean_field = means.reshape(3, nx * ny)
 flat_flucs = flucs_field.reshape(3, nx * ny, nt)
-# flat_flucs = flucs_field.reshape(2, nx*ny, nt)
-# flatfucku = fft_wrapper(flat_flucs[0].T, dt, nDFT=nt/2).mean(axis=2)
-# flatfuckv = fft_wrapper(flat_flucs[1].T, dt, nDFT=nt/2).mean(axis=2)
-# _, fNt = flatfucku.shape
-# fft_flucs = np.array([flatfucku, flatfuckv]).reshape(2, nx, ny, fNt)
-mean_field = np.repeat(means.reshape(2, nx, ny, 1), nt, axis=3)
 
 print("FFT done")
 
@@ -71,7 +67,6 @@ flat_flucs.resize(3*nx*ny, nt)
 fluc1 = flat_flucs[:, :-1]
 fluc2 = flat_flucs[:, 1:]
 
-k = 200
 # def fbDMD(fluc1,fluc2,k):
 # backwards
 # U,Sigma,VT = np.linalg.svd(fluc2,full_matrices=False)
@@ -81,14 +76,35 @@ k = 200
 # VTr = VT[:k,:]
 # Atildeb = np.linalg.solve(Sigmar.T,(Ur.T @ fluc1 @ VTr.T).T).T
 #forwards
-U,Sigma,VT = np.linalg.svd(fluc1,full_matrices=False) # Step 1 - SVD, init
+# U,Sigma,VT = svd(fluc1,full_matrices=False) # Step 1 - SVD, init
 # Sigma_plot(Sigma)
-Ur = U[:,:k]
-Sigmar = np.diag(Sigma[:k])
-VTr = VT[:k,:]
-Atilde = np.linalg.solve(Sigmar.T,(Ur.T @ fluc2 @ VTr.T).T).T # Step 2 - Find the linear operator using psuedo inverse
+# Ur = U[:,:k]
+# Sigmar = np.diag(Sigma[:k])
+# VTr = VT[:k,:]
+# Atilde = np.linalg.solve(Sigmar.T,(Ur.T @ fluc2 @ VTr.T).T).T # Step 2 - Find the linear operator using psuedo inverse
 # Atilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
 # I think we're good up to here...
+
+U, Sigma, VT = svd(fluc1, full_matrices=False)
+r = 10 # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
+r = int(r)  # Make sure r is less than the minimum of nt and 3*nx*ny
+
+U_r = U[:, :r]
+S_r = np.diag(Sigma[:r])
+VT_r = VT[:r, :]
+
+A_tilde = np.dot(np.dot(np.dot(U_r.T, fluc2), VT_r.T), np.linalg.inv(S_r))
+eigvals, W = np.linalg.eig(A_tilde)
+Phi = np.dot(np.dot(fluc2, VT_r.T), np.dot(np.linalg.inv(S_r), W))
+
+Q = np.eye(3 * nx * ny)  # Identity matrix for simplicity
+
+V_r_star_Q = np.dot(Phi.conj().T, Q)
+V_r_star_Q_V_r = np.dot(V_r_star_Q, Phi)
+
+# Cholesky factorization
+F_tilde = cholesky(V_r_star_Q_V_r)
+
 
 rho, W = np.linalg.eig(Atilde) # Step 3 - Eigenvalues
 # Wadj = np.conjugate(W).T
@@ -116,21 +132,21 @@ Phi = Phi[:,large]
 Lambda =  Lambda[large]
 
 # define the resolvant operator
-omegaSpan = np.linspace(-3, 3, 1000)
+omegaSpan = np.linspace(1, 100, 1000)
 gain = np.empty((omegaSpan.size, Lambda.size))
-for idx, omega in enumerate(omegaSpan):
-    R = np.linalg.svd(np.linalg.inv(-1j*omega*np.eye(Lambda.size)-np.diag(Lambda)),
+for idx, omega in tqdm(enumerate(omegaSpan)):
+    R = np.linalg.svd(np.linalg.inv((-1j*omega)*np.eye(Lambda.shape[0])-np.diag(Lambda)),
                       compute_uv=False)
     gain[idx] = R**2
 
 
 fig, ax = plt.subplots(figsize = (3,3))
-ax.set_yscale('log')
+# ax.set_yscale('log')
 ax.set_xlabel(r"$f^*$")
 ax.set_ylabel(r"$\sigma_j$")
 # ax.set_xlim(0, 10)
 for i in range(0,4):
-    ax.plot(omegaSpan, np.sqrt(gain[:, i]))
+    ax.loglog(omegaSpan, np.sqrt(gain[:, i]))
 
 plt.savefig("stationary/figures/opt_gain_DMD.pdf")
 plt.close()
