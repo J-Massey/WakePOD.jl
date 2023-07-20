@@ -5,7 +5,7 @@ import numpy as np
 from lotusvis.spod import spod
 from scipy.fft import fft, ifft, fftfreq
 import scipy.sparse as sp
-from src.fft_wrapper import fft_wrapper
+# from src.fft_wrapper import fft_wrapper
 import h5py
 
 import matplotlib.pyplot as plt

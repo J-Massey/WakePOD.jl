@@ -1,58 +1,16 @@
-Running SLURM prolog script on ruby027.cluster.local
+Running SLURM prolog script on gold66.cluster.local
 ===============================================================================
-Job started on Tue Jul 18 10:13:01 BST 2023
-Job ID          : 4040576
+Job started on Thu Jul 20 09:16:35 BST 2023
+Job ID          : 4102875
 Job name        : DMD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
-Partition       : amd
+Partition       : highmem
 Num hosts       : 1
 Num cores       : 64
 Num of tasks    : 64
-Hosts allocated : ruby027
+Hosts allocated : gold66
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Tue Jul 18 10:13:01 BST 2023
+Starting calculation at Thu Jul 20 09:16:36 BST 2023
 ---------------------------------------------------------------
-slurmstepd-ruby070: error: *** JOB 4038368 ON ruby070 CANCELLED AT 2023-07-18T17:27:09 DUE TO TIME LIMIT ***
-==============================================================================
-Running epilogue script on ruby070.
-
-Submit time  : 2023-07-18T09:18:48
-Start time   : 2023-07-18T09:27:05
-End time     : 2023-07-18T17:27:09
-Elapsed time : 08:00:04 (Timelimit=08:00:00)
-
-Job ID: 4038368
-Cluster: i5
-User/Group: jmom1n15/mm
-State: TIMEOUT (exit code 0)
-Nodes: 1
-Cores per node: 64
-CPU Utilized: 38-14:22:42
-CPU Efficiency: 180.91% of 21-08:04:16 core-walltime
-Job Wall-clock time: 08:00:04
-Memory Utilized: 687.73 GB
-Memory Efficiency: 305.66% of 225.00 GB
-
-slurmstepd-ruby027: error: *** JOB 4040576 ON ruby027 CANCELLED AT 2023-07-18T17:34:02 ***
-==============================================================================
-Running epilogue script on ruby027.
-
-Submit time  : 2023-07-18T10:12:31
-Start time   : 2023-07-18T10:12:59
-End time     : 2023-07-18T17:34:02
-Elapsed time : 07:21:03 (Timelimit=08:00:00)
-
-Job ID: 4040576
-Cluster: i5
-User/Group: jmom1n15/mm
-State: CANCELLED (exit code 0)
-Nodes: 1
-Cores per node: 64
-CPU Utilized: 20:30:09
-CPU Efficiency: 4.36% of 19-14:27:12 core-walltime
-Job Wall-clock time: 07:21:03
-Memory Utilized: 773.49 GB
-Memory Efficiency: 343.77% of 225.00 GB
-
