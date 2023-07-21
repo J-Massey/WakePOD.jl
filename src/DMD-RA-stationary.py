@@ -81,46 +81,67 @@ fluc2 = flat_flucs[:, 1:]
 # Ur = U[:,:k]
 # Sigmar = np.diag(Sigma[:k])
 # VTr = VT[:k,:]
-# Atilde = np.linalg.solve(Sigmar.T,(Ur.T @ fluc2 @ VTr.T).T).T # Step 2 - Find the linear operator using psuedo inverse
 # Atilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
 # I think we're good up to here...
 
 U, Sigma, VT = svd(fluc1, full_matrices=False)
-r = 10 # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
-r = int(r)  # Make sure r is less than the minimum of nt and 3*nx*ny
-
+fig, ax = plt.subplots(figsize = (3,3))
+ax.set_ylabel(r"$\sigma_r/\Sigma \sigma$")
+ax.set_xlabel(r"$r$")
+ax.scatter(range(Sigma.size), Sigma/np.sum(Sigma), s=2)
+plt.savefig("stationary/figures/sigmas.png", dpi=700)
+plt.close()
+r = 2 # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
 U_r = U[:, :r]
 S_r = np.diag(Sigma[:r])
 VT_r = VT[:r, :]
 
-A_tilde = np.dot(np.dot(np.dot(U_r.T, fluc2), VT_r.T), np.linalg.inv(S_r))
+A_tilde = np.linalg.solve(S_r.T,(U_r.T @ fluc2 @ VT_r.T).T).T # Step 2 - Find the linear operator using psuedo inverse
+# A_tilde = np.dot(np.dot(np.dot(U_r.T, fluc2), VT_r.T), np.linalg.inv(S_r))
 eigvals, W = np.linalg.eig(A_tilde)
+
 Phi = np.dot(np.dot(fluc2, VT_r.T), np.dot(np.linalg.inv(S_r), W))
+# Phi = fluc2 @ np.linalg.solve(S_r.T,VT_r).T @ W # Step 4 - Modes
 
-Q = np.eye(3 * nx * ny)  # Identity matrix for simplicity
+# Q = sp.eye(3 * nx * ny)  # Identity matrix for simplicity, no need for now
 
-V_r_star_Q = np.dot(Phi.conj().T, Q)
+# print("The memory size of Q is:", Q.itemsize * Q.size / 1e9, "GB")
+
+V_r_star_Q = Phi.conj().T
 V_r_star_Q_V_r = np.dot(V_r_star_Q, Phi)
 
 # Cholesky factorization
 F_tilde = cholesky(V_r_star_Q_V_r)
 
-
-rho, W = np.linalg.eig(Atilde) # Step 3 - Eigenvalues
+rho, W = np.linalg.eig(A_tilde) # Step 3 - Eigenvalues
 # Wadj = np.conjugate(W).T
 
-Lambda = np.log(rho)/dt  # Spectral expansion
+Lambda = np.log(eigvals)/dt  # Spectral expansion
 
 fig, ax = plt.subplots(figsize = (3,3))
-# ax.set_yscale('log')
 ax.set_xlabel(r"$\Im \lambda_i$")
 ax.set_ylabel(r"$\Re \lambda_i$")
-# ax.set_xlim(0, 10)
 ax.scatter(Lambda.imag, Lambda.real, s=2)
 plt.savefig("stationary/figures/Lambda.pdf")
 plt.close()
 
-Phi = fluc2 @ np.linalg.solve(Sigmar.T,VTr).T @ W # Step 4 - Modes
+omegaSpan = np.linspace(1, 100, 1000)
+gain = np.empty((omegaSpan.size, Lambda.size))
+for idx, omega in tqdm(enumerate(omegaSpan)):
+    R = np.linalg.svd(F_tilde@np.linalg.inv((-1j*omega)*np.eye(Lambda.shape[0])-np.diag(Lambda)@np.linalg.inv(F_tilde)),
+                      compute_uv=False)
+    gain[idx] = R**2
+
+fig, ax = plt.subplots(figsize = (3,3))
+ax.set_xlabel(r"$\omega$")
+ax.set_ylabel(r"$\sigma_i$")
+# ax.set_xlim(0, 10)
+for i in range(0,4):
+    ax.loglog(omegaSpan, np.sqrt(gain[:, i]))
+plt.savefig("stationary/figures/opt_gain_DMD.png", dpi=700)
+plt.close()
+
+
 alpha1 = Sigmar @ VTr[:,0]  # First mode POD
 # b = np.linalg.solve(W @ rho,alpha1)  # The mode amplitudes
 b = alpha1/(W @ rho)
@@ -132,21 +153,4 @@ Phi = Phi[:,large]
 Lambda =  Lambda[large]
 
 # define the resolvant operator
-omegaSpan = np.linspace(1, 100, 1000)
-gain = np.empty((omegaSpan.size, Lambda.size))
-for idx, omega in tqdm(enumerate(omegaSpan)):
-    R = np.linalg.svd(np.linalg.inv((-1j*omega)*np.eye(Lambda.shape[0])-np.diag(Lambda)),
-                      compute_uv=False)
-    gain[idx] = R**2
 
-
-fig, ax = plt.subplots(figsize = (3,3))
-# ax.set_yscale('log')
-ax.set_xlabel(r"$f^*$")
-ax.set_ylabel(r"$\sigma_j$")
-# ax.set_xlim(0, 10)
-for i in range(0,4):
-    ax.loglog(omegaSpan, np.sqrt(gain[:, i]))
-
-plt.savefig("stationary/figures/opt_gain_DMD.pdf")
-plt.close()
