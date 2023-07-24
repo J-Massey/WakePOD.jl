@@ -2,7 +2,7 @@ import os
 from tqdm import tqdm
 
 import numpy as np
-from src.LNSO import *
+from LNSO import *
 import scipy.sparse as sp
 import scipy.sparse.linalg as sp_linalg
 import scipy.linalg as linalg
