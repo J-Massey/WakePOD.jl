@@ -76,12 +76,10 @@ def create_grad_operator_y(nx, ny, dy):
         grad_operator[idx * ny, idx * ny] = -1.5
         grad_operator[idx * ny, idx * ny + 1] = 2
         grad_operator[idx * ny, idx * ny + 2] = -0.5
-        
-        grad_operator[(idx + 1) * ny - 1, (idx + 1) * ny] = 0
-        grad_operator[(idx + 1) * ny - 1, (idx + 1) * ny - 1] = 1.5
-        grad_operator[(idx + 1) * ny - 1, (idx + 1) * ny - 2] = -2
-        if (idx + 1) * ny - 3 >= 0:  # This check is required to avoid negative indexing wrap-around
-            grad_operator[(idx + 1) * ny - 1, (idx + 1) * ny - 3] = 0.5
+        grad_operator[-idx * (ny) - 1, -idx * (ny)] = 0
+        grad_operator[-idx * (ny) - 1, -idx * (ny) - 1] = 1.5
+        grad_operator[-idx * (ny) - 1, -idx * (ny) - 2] = -2
+        grad_operator[-idx * (ny) - 1, -idx * (ny) - 3] = 0.5
 
     return grad_operator.tocsr() / dy
 
@@ -95,7 +93,7 @@ def test_grad_operator_y(nx, ny):
     )
 
 
-# test_grad_operator_y(nx, ny)
+test_grad_operator_y(nx, ny)
 
 
 def create_grad_operator_x(nx, ny, dx):
@@ -107,7 +105,7 @@ def create_grad_operator_x(nx, ny, dx):
     diagonals = [main_diag, off_diag, off_diag2]
     # Offsets for diagonals
     offsets = [0, -ny, ny]
-    grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format="csr")
+    grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format="lil")
     for idx in range(ny):
         grad_operator[idx] = 0
         grad_operator[idx, idx] = -1.5
@@ -118,7 +116,7 @@ def create_grad_operator_x(nx, ny, dx):
         grad_operator[bc - idx, bc - idx] = 1.5
         grad_operator[bc - idx, bc - idx - ny] = -2
         grad_operator[bc - idx, bc - idx - 2 * ny] = 0.5
-    return grad_operator / dx
+    return grad_operator.tocsr() / dx
 
 
 def test_grad_operator_x(nx, ny):
@@ -128,7 +126,7 @@ def test_grad_operator_x(nx, ny):
     return np.allclose((oprand @ utestrand.reshape(nx * ny, 1)).reshape(nx, ny), durand)
 
 
-# test_grad_operator_x(nx, ny)
+test_grad_operator_x(nx, ny)
 
 
 def create_laplacian_operator_x(nx, ny, dx=1):
@@ -140,7 +138,7 @@ def create_laplacian_operator_x(nx, ny, dx=1):
     diagonals = [main_diag, off_diag, off_diag2]
     # Offsets for diagonals
     offsets = [0, -ny, ny]
-    laplacian_operator = sp.diags(diagonals, offsets, shape=(size, size), format="csr")
+    laplacian_operator = sp.diags(diagonals, offsets, shape=(size, size), format="lil")
     for idx in range(ny):
         laplacian_operator[idx] = 0
         laplacian_operator[idx, idx] = 2
@@ -153,7 +151,7 @@ def create_laplacian_operator_x(nx, ny, dx=1):
         laplacian_operator[bc - idx, bc - idx - ny] = -5
         laplacian_operator[bc - idx, bc - idx - 2 * ny] = 4
         laplacian_operator[bc - idx, bc - idx - 3 * ny] = -1
-    return laplacian_operator / (dx**2)
+    return laplacian_operator.tocsr() / (dx**2)
 
 
 def create_laplacian_operator_y(nx, ny, dy):
@@ -165,7 +163,7 @@ def create_laplacian_operator_y(nx, ny, dy):
     diagonals = [main_diag, off_diag, off_diag2]
     # Offsets for diagonals
     offsets = [0, -1, 1]
-    grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format="csr")
+    grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format="lil")
     for idx in range(nx):
         grad_operator[idx * (ny), idx * (ny) - 1] = 0
         grad_operator[idx * (ny), idx * (ny)] = 2
@@ -177,7 +175,7 @@ def create_laplacian_operator_y(nx, ny, dy):
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 2] = -5
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 3] = 4
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 4] = -1
-    return grad_operator / (dy**2)
+    return grad_operator.tocsr() / (dy**2)
 
 
 def test_laplacian_operator_y(nx, ny):
