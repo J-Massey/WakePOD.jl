@@ -19,13 +19,13 @@ plt.rcParams["font.size"] = "10.5"
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-u = u[::4, ::4, ::4]
+u = u[::16, ::16, ::16]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-v = v[::4, ::4, ::4]
+v = v[::16, ::16, ::16]
 p = np.load("data/stationary/10k/p.npy")
 p = np.einsum("ijk -> kji", p)
-p = p[::4, ::4, ::4]
+p = p[::16, ::16, ::16]
 
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
@@ -60,24 +60,30 @@ flat_flucs = flucs_field.reshape(3, nx * ny, nt)
 
 def create_grad_operator_y(nx, ny, dy):
     size = nx * ny
+
     # Diagonal values
     main_diag = np.ones(size) * 0
     off_diag = np.ones(size) * -0.5
     off_diag2 = np.ones(size) * 0.5
+
+    # Construct the base operator
     diagonals = [main_diag, off_diag, off_diag2]
-    # Offsets for diagonals
     offsets = [0, -1, 1]
-    grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format="csr")
+    grad_operator = sp.diags(diagonals, offsets, shape=(size, size), format="lil")
+
     for idx in range(nx):
-        grad_operator[idx * (ny), idx * (ny) - 1] = 0
-        grad_operator[idx * (ny), idx * (ny)] = -1.5
-        grad_operator[idx * (ny), idx * (ny) + 1] = 2
-        grad_operator[idx * (ny), idx * (ny) + 2] = -0.5
-        grad_operator[-idx * (ny) - 1, -idx * (ny)] = 0
-        grad_operator[-idx * (ny) - 1, -idx * (ny) - 1] = 1.5
-        grad_operator[-idx * (ny) - 1, -idx * (ny) - 2] = -2
-        grad_operator[-idx * (ny) - 1, -idx * (ny) - 3] = 0.5
-    return grad_operator / dy
+        grad_operator[idx * ny, idx * ny - 1] = 0
+        grad_operator[idx * ny, idx * ny] = -1.5
+        grad_operator[idx * ny, idx * ny + 1] = 2
+        grad_operator[idx * ny, idx * ny + 2] = -0.5
+        
+        grad_operator[(idx + 1) * ny - 1, (idx + 1) * ny] = 0
+        grad_operator[(idx + 1) * ny - 1, (idx + 1) * ny - 1] = 1.5
+        grad_operator[(idx + 1) * ny - 1, (idx + 1) * ny - 2] = -2
+        if (idx + 1) * ny - 3 >= 0:  # This check is required to avoid negative indexing wrap-around
+            grad_operator[(idx + 1) * ny - 1, (idx + 1) * ny - 3] = 0.5
+
+    return grad_operator.tocsr() / dy
 
 
 def test_grad_operator_y(nx, ny):

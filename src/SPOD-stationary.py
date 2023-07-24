@@ -15,9 +15,6 @@ def load_and_process_data(filepath):
     data = np.einsum("ijk -> kji", data)
     return data[::2, ::2, :]
 
-# Define the slicing pattern as a variable for clarity
-slice_pattern = (slice(None, None, 2), slice(None, None, 2), slice(None, None, 4))
-
 u = load_and_process_data("data/stationary/10k/u.npy")
 v = load_and_process_data("data/stationary/10k/v.npy")
 p = load_and_process_data("data/stationary/10k/p.npy")
@@ -25,7 +22,7 @@ p = load_and_process_data("data/stationary/10k/p.npy")
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
 
-T = 7  # number of cycles
+T = 15  # number of cycles
 dt = T / nt
 
 pxs = np.linspace(*xlims, nx)
@@ -59,27 +56,31 @@ print("FFT done")
 flatflucs.resize(3*nx*ny, nt)
 flatflucs = flatflucs.T
 
-# Test plot
-fig, ax = plt.subplots(figsize=(5, 3))
-lim = [-0.5, 0.5]
-levels = np.linspace(lim[0], lim[1], 44)
-_cmap = sns.color_palette("seismic", as_cmap=True)
-cs = ax.contourf(
-    pxs,
-    pys,
-    flatflucs.mean(axis=0).reshape(ny, nx),
-    levels=levels,
-    vmin=lim[0],
-    vmax=lim[1],
-    # norm=norm,
-    cmap=_cmap,
-    extend="both",
-)
-ax.set_aspect(1)
-# ax.set_title(f"$\omega={frequencies_bsort[oms]:.2f},St={frequencies_bsort[oms]/(2*np.pi):.2f}$")
-plt.savefig(f"./stationary/figures/testv10k.pdf", dpi=600)
-plt.close()
+def plot_flows(qi, fn, _cmap, lim):
+    # Test plot
+    fig, ax = plt.subplots(figsize=(5, 3))
+    lim = [-0.5, 0.5]
+    levels = np.linspace(lim[0], lim[1], 44)
+    _cmap = sns.color_palette("seismic", as_cmap=True)
+    cs = ax.contourf(
+        pxs,
+        pys,
+        qi,
+        levels=levels,
+        vmin=lim[0],
+        vmax=lim[1],
+        # norm=norm,
+        cmap=_cmap,
+        extend="both",
+    )
+    ax.set_aspect(1)
+    # ax.set_title(f"$\omega={frequencies_bsort[oms]:.2f},St={frequencies_bsort[oms]/(2*np.pi):.2f}$")
+    plt.savefig(f"./stationary/figures/{fn}.pdf", dpi=600)
+    plt.close()
 
+plot_flows(u_mean.T, "u", "icefire", [0, 1.5])
+plot_flows(v_mean.T, "v", "seismic", [-1, 1])
+plot_flows(p_mean.T, "p", "seismic", [-0.5, 0.5])
 print("Plotted")
 
 
