@@ -282,32 +282,3 @@ sp.save_npz("stationary/10k/L_big.npy", L_big)
 
 # anim.save(f"stationary/figures/test_u.gif", fps=5, bitrate=-1, dpi=400)
 
-# A = 1j*6*sp.eye(L_big.shape[0])- L_big
-
-# Ainv = spsolve(A, sp.eye(A.shape[0]).tocsc())
-
-H = 1j*4*sp.eye(L_big.shape[0])- L_big
-IR = sp.eye(L_big.shape[0]).tocsc()
-Hinv = spsolve(H, IR)
-
-omegaspan = np.linspace(1,20*np.pi)
-Sigma =[]
-for omega in tqdm(omegaspan):
-    H = 1j*omega*sp.eye(L_big.shape[0])- L_big
-    Hinv = spsolve(H, IR)
-    S = svds(H, return_singular_vectors=False)
-    S
-    Sigma.append(S)
-
-fig, ax = plt.subplots(figsize=(3, 3))
-# ax.set_yscale("log")
-ax.set_xlabel(r"$\omega$")
-ax.set_ylabel(r"$\sigma_u$")
-ax.loglog(omegaspan, np.array(Sigma)[:,0])
-ax.loglog(omegaspan, np.array(Sigma)[:,1])
-ax.loglog(omegaspan, np.array(Sigma)[:,2])
-
-plt.savefig(f"./stationary/figures/fullRAgain.pdf", dpi=600)
-plt.close()
-
-
