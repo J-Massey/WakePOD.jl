@@ -197,7 +197,7 @@ D2x = create_laplacian_operator_x(nx, ny, dx)
 D2y = create_laplacian_operator_y(nx, ny, dy)
 LAP = D2x + D2y
 I = sp.eye(nx * ny)
-Z = np.zeros((nx * ny, nx * ny))
+Z = 0*I
 Re = 10250
 
 L1_big = np.concatenate(
