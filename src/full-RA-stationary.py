@@ -19,13 +19,13 @@ plt.rcParams["font.size"] = "10.5"
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-u = u[::8, ::8, ::8]
+u = u[::4, ::4, ::4]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-v = v[::8, ::8, ::8]
+v = v[::4, ::4, ::4]
 p = np.load("data/stationary/10k/p.npy")
 p = np.einsum("ijk -> kji", p)
-p = p[::8, ::8, ::8]
+p = p[::4, ::4, ::4]
 
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
@@ -220,6 +220,7 @@ L3_big = np.concatenate((D1x.toarray(), D1y.toarray(), Z), axis=1)
 
 L_big = np.concatenate((L1_big, L2_big, L3_big), axis=0)
 print("The memory size of numpy array arr is:", L_big.itemsize * L_big.size / 1e9, "GB")
+np.save("stationary/10k/L_big.npy", L_big)
 
 big_flucs = flat_flucs.reshape(3 * nx * ny, nt)#.repeat(3, axis=0)
 L_big.shape, big_flucs.shape

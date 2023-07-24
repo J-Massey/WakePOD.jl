@@ -69,46 +69,38 @@ fluc2 = flat_flucs[:, 1:]
 
 # def fbDMD(fluc1,fluc2,k):
 # backwards
-# U,Sigma,VT = np.linalg.svd(fluc2,full_matrices=False)
-# # Sigma_plot(Sigma)
-# Ur = U[:,:k]
-# Sigmar = np.diag(Sigma[:k])
-# VTr = VT[:k,:]
-# Atildeb = np.linalg.solve(Sigmar.T,(Ur.T @ fluc1 @ VTr.T).T).T
-#forwards
-# U,Sigma,VT = svd(fluc1,full_matrices=False) # Step 1 - SVD, init
+U,Sigma,VT = np.linalg.svd(fluc2,full_matrices=False)
 # Sigma_plot(Sigma)
-# Ur = U[:,:k]
-# Sigmar = np.diag(Sigma[:k])
-# VTr = VT[:k,:]
-# Atilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
-# I think we're good up to here...
-
-U, Sigma, VT = svd(fluc1, full_matrices=False)
 fig, ax = plt.subplots(figsize = (3,3))
 ax.set_ylabel(r"$\sigma_r/\Sigma \sigma$")
 ax.set_xlabel(r"$r$")
 ax.scatter(range(Sigma.size), Sigma/np.sum(Sigma), s=2)
 plt.savefig("stationary/figures/sigmas.png", dpi=700)
 plt.close()
-r = 2 # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
+r = 7 # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
+U_r = U[:,:r]
+Sigmar = np.diag(Sigma[:r])
+VT_r = VT[:r,:]
+Atildeb = np.linalg.solve(Sigmar.T,(U_r.T @ fluc1 @ VT_r.T).T).T
+
+U, Sigma, VT = svd(fluc1, full_matrices=False)
 U_r = U[:, :r]
 S_r = np.diag(Sigma[:r])
 VT_r = VT[:r, :]
-
-A_tilde = np.linalg.solve(S_r.T,(U_r.T @ fluc2 @ VT_r.T).T).T # Step 2 - Find the linear operator using psuedo inverse
+Atildef = np.linalg.solve(S_r.T,(U_r.T @ fluc2 @ VT_r.T).T).T # Step 2 - Find the linear operator using psuedo inverse
+A_tilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
 # A_tilde = np.dot(np.dot(np.dot(U_r.T, fluc2), VT_r.T), np.linalg.inv(S_r))
 eigvals, W = np.linalg.eig(A_tilde)
 
-Phi = np.dot(np.dot(fluc2, VT_r.T), np.dot(np.linalg.inv(S_r), W))
-# Phi = fluc2 @ np.linalg.solve(S_r.T,VT_r).T @ W # Step 4 - Modes
+V_r = np.dot(np.dot(fluc2, VT_r.T), np.dot(np.linalg.inv(S_r), W))
+# V_r = fluc2 @ np.linalg.solve(S_r.T,VT_r).T @ W # Step 4 - Modes
 
 # Q = sp.eye(3 * nx * ny)  # Identity matrix for simplicity, no need for now
 
 # print("The memory size of Q is:", Q.itemsize * Q.size / 1e9, "GB")
 
-V_r_star_Q = Phi.conj().T
-V_r_star_Q_V_r = np.dot(V_r_star_Q, Phi)
+V_r_star_Q = V_r.conj().T
+V_r_star_Q_V_r = np.dot(V_r_star_Q, V_r)
 
 # Cholesky factorization
 F_tilde = cholesky(V_r_star_Q_V_r)
@@ -125,10 +117,10 @@ ax.scatter(Lambda.imag, Lambda.real, s=2)
 plt.savefig("stationary/figures/Lambda.pdf")
 plt.close()
 
-omegaSpan = np.linspace(1, 100, 1000)
+omegaSpan = np.linspace(1, 1000, 2000)
 gain = np.empty((omegaSpan.size, Lambda.size))
 for idx, omega in tqdm(enumerate(omegaSpan)):
-    R = np.linalg.svd(F_tilde@np.linalg.inv((-1j*omega)*np.eye(Lambda.shape[0])-np.diag(Lambda)@np.linalg.inv(F_tilde)),
+    R = np.linalg.svd(F_tilde@np.linalg.inv((-1j*omega)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde),
                       compute_uv=False)
     gain[idx] = R**2
 
@@ -138,19 +130,57 @@ ax.set_ylabel(r"$\sigma_i$")
 # ax.set_xlim(0, 10)
 for i in range(0,4):
     ax.loglog(omegaSpan, np.sqrt(gain[:, i]))
-plt.savefig("stationary/figures/opt_gain_DMD.png", dpi=700)
+plt.savefig("stationary/figures/opt_gain_DMD.pdf", dpi=700)
 plt.close()
 
+max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
 
-alpha1 = Sigmar @ VTr[:,0]  # First mode POD
-# b = np.linalg.solve(W @ rho,alpha1)  # The mode amplitudes
-b = alpha1/(W @ rho)
+Psi, Sigma, Phi = np.linalg.svd(F_tilde@np.linalg.inv((-1j*max_gain_om)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde))
 
-# Let's trim some fat using the mode aplitudes
-tol = 1e-6
-large = abs(b)>tol*np.max(abs(b))
-Phi = Phi[:,large]
-Lambda =  Lambda[large]
+forcing = V_r @ np.linalg.inv(F_tilde)*Sigma
+forcing.resize(3, nx, ny, r)
 
-# define the resolvant operator
+lim = [-3e-4, 3e-4]
+fig, ax = plt.subplots(figsize=(5, 4))
+levels = np.linspace(lim[0], lim[1], 44)
+_cmap = sns.color_palette("seismic", as_cmap=True)
+
+cont = ax.contourf(pxs, pys, forcing[0, :, :, 1].T,
+                            levels=levels,
+                            vmin=lim[0],
+                            vmax=lim[1],
+                            # norm=norm,
+                            cmap=_cmap,
+                            extend="both",
+                        )
+
+ax.set_aspect(1)
+ax.set(xlabel=r"$x$", ylabel=r"$y$")
+
+plt.savefig("stationary/figures/forcing.pdf")
+plt.close()
+
+response = V_r @ np.linalg.inv(F_tilde)@Psi
+response.resize(3, nx, ny, r)
+
+lim = [-7e-3, 7e-3]
+fig, ax = plt.subplots(figsize=(5, 4))
+levels = np.linspace(lim[0], lim[1], 44)
+_cmap = sns.color_palette("seismic", as_cmap=True)
+
+cont = ax.contourf(pxs, pys, response[0, :, :, 1].T,
+                            levels=levels,
+                            vmin=lim[0],
+                            vmax=lim[1],
+                            # norm=norm,
+                            cmap=_cmap,
+                            extend="both",
+                        )
+
+ax.set_aspect(1)
+ax.set(xlabel=r"$x$", ylabel=r"$y$")
+
+plt.savefig("stationary/figures/response.pdf")
+plt.close()
+
 

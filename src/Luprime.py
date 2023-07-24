@@ -106,8 +106,6 @@ Luprime[0, :,:,0].max()
 
 # Now visualise the two fields
 
-
-fig, ax = plt.subplots(figsize = (3,3))
 lim=[-0.4, 0.4]
 
 fig, ax = plt.subplots(figsize=(5, 4))

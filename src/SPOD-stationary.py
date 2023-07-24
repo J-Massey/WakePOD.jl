@@ -10,22 +10,54 @@ import matplotlib.animation as animation
 plt.style.use(["science"])
 plt.rcParams["font.size"] = "10.5"
 
-flow = np.load("data/stationary/10k/v.npy")
-# flow  = flow[:, :, :]
-print("Loaded")
+def load_and_process_data(filepath):
+    data = np.load(filepath)
+    data = np.einsum("ijk -> kji", data)
+    return data[::2, ::2, :]
+
+# Define the slicing pattern as a variable for clarity
+slice_pattern = (slice(None, None, 2), slice(None, None, 2), slice(None, None, 4))
+
+u = load_and_process_data("data/stationary/10k/u.npy")
+v = load_and_process_data("data/stationary/10k/v.npy")
+p = load_and_process_data("data/stationary/10k/p.npy")
+
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
-nt, ny, nx = flow.shape
+nx, ny, nt = v.shape
+
 T = 7  # number of cycles
 dt = T / nt
+
 pxs = np.linspace(*xlims, nx)
+dx = np.diff(pxs).mean()
+
 pys = np.linspace(*ylims, ny)
+dy = np.diff(pys).mean()
 
-# time_flucs = flow - flow.mean(axis=2)[:, :, None]
-# np.save("data/stationary/time_flucs.npy", time_flucs)
+# Reynolds decomposition
+u_flucs = np.empty_like(u)
+v_flucs = np.empty_like(v)
+p_flucs = np.empty_like(p)
+u_mean = u.mean(axis=2)
+v_mean = v.mean(axis=2)
+p_mean = p.mean(axis=2)
+for t in range(nt):
+    u_flucs[:, :, t] = u[:, :, t] - u_mean
+    v_flucs[:, :, t] = v[:, :, t] - v_mean
+    p_flucs[:, :, t] = p[:, :, t] - p_mean
 
-# flow.shape
-# del flow
-flatflucs = flow.reshape(nt, nx*ny)
+print("Flucs done")
+
+# means = np.array([u_mean, v_mean, p_mean])
+flucs_field = np.array([u_flucs, v_flucs, p_flucs])
+# flat_mean_field = means.reshape(3, nx * ny)
+flatflucs = flucs_field.reshape(3, nx * ny, nt)
+
+print("FFT done")
+
+# Define inputs for DMD on the vertical velocity
+flatflucs.resize(3*nx*ny, nt)
+flatflucs = flatflucs.T
 
 # Test plot
 fig, ax = plt.subplots(figsize=(5, 3))
@@ -78,5 +110,5 @@ ax.set_xlabel(r'$\omega$')
 ax.set_ylabel(r'$\lambda_i$')
 ax.legend(loc='upper right')
 
-plt.savefig(f"./stationary/figures/10kspectrum.pdf", dpi=600)
+plt.savefig(f"./stationary/figures/SPODspectrum.png", dpi=600)
 plt.close()

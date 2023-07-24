@@ -1,40 +1,41 @@
-Running SLURM prolog script on gold63.cluster.local
+Running SLURM prolog script on gold66.cluster.local
 ===============================================================================
-Job started on Tue Jul 18 23:53:04 BST 2023
-Job ID          : 4047586
+Job started on Sun Jul 23 18:12:04 BST 2023
+Job ID          : 4246529
 Job name        : animate
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/genSub
 Partition       : highmem
-Num hosts       : 4
-Num cores       : 256
-Num of tasks    : 256
-Hosts allocated : gold[63-66]
+Num hosts       : 1
+Num cores       : 64
+Num of tasks    : 64
+Hosts allocated : gold66
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Tue Jul 18 23:53:05 BST 2023
+Starting calculation at Sun Jul 23 18:12:04 BST 2023
 ---------------------------------------------------------------
-Traceback (most recent call last):
-  File "src/full-RA-stationary.py", line 8, in <module>
-    from src.fft_wrapper import fft_wrapper
-ModuleNotFoundError: No module named 'src'
+/home/jmom1n15/.conda/envs/an/lib/python3.11/site-packages/scipy/sparse/_index.py:146: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive. lil_matrix is more efficient.
+  self._set_arrayXarray(i, j, x)
+/home/jmom1n15/.conda/envs/an/lib/python3.11/site-packages/scipy/sparse/_index.py:103: SparseEfficiencyWarning: Changing the sparsity structure of a csr_matrix is expensive. lil_matrix is more efficient.
+  self._set_intXint(row, col, x.flat[0])
+slurmstepd-gold66: error: *** JOB 4246529 ON gold66 CANCELLED AT 2023-07-23T23:12:09 DUE TO TIME LIMIT ***
 ==============================================================================
-Running epilogue script on gold63.
+Running epilogue script on gold66.
 
-Submit time  : 2023-07-18T17:50:04
-Start time   : 2023-07-18T23:53:03
-End time     : 2023-07-18T23:53:30
-Elapsed time : 00:00:27 (Timelimit=1-07:00:00)
+Submit time  : 2023-07-23T18:11:32
+Start time   : 2023-07-23T18:12:04
+End time     : 2023-07-23T23:12:09
+Elapsed time : 05:00:05 (Timelimit=05:00:00)
 
-Job ID: 4047586
+Job ID: 4246529
 Cluster: i5
 User/Group: jmom1n15/mm
-State: FAILED (exit code 1)
-Nodes: 4
+State: TIMEOUT (exit code 0)
+Nodes: 1
 Cores per node: 64
-CPU Utilized: 00:00:11
-CPU Efficiency: 0.16% of 01:55:12 core-walltime
-Job Wall-clock time: 00:00:27
-Memory Utilized: 2.55 MB
-Memory Efficiency: 0.00% of 5.77 TB
+CPU Utilized: 00:00:01
+CPU Efficiency: 0.00% of 13-08:05:20 core-walltime
+Job Wall-clock time: 05:00:05
+Memory Utilized: 1.43 TB
+Memory Efficiency: 99.31% of 1.44 TB
 
