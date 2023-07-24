@@ -5,6 +5,7 @@ import numpy as np
 from lotusvis.spod import spod
 from scipy.fft import fft, ifft, fftfreq
 import scipy.sparse as sp
+from scipy.sparse.linalg import svds, spsolve
 # from src.fft_wrapper import fft_wrapper
 import h5py
 
@@ -19,13 +20,13 @@ plt.rcParams["font.size"] = "10.5"
 
 u = np.load("data/stationary/10k/u.npy")
 u = np.einsum("ijk -> kji", u)
-u = u[::16, ::16, ::16]
+u = u[::16, ::16, ::64]
 v = np.load("data/stationary/10k/v.npy")
 v = np.einsum("ijk -> kji", v)
-v = v[::16, ::16, ::16]
+v = v[::16, ::16, ::64]
 p = np.load("data/stationary/10k/p.npy")
 p = np.einsum("ijk -> kji", p)
-p = p[::16, ::16, ::16]
+p = p[::16, ::16, ::64]
 
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
@@ -200,116 +201,97 @@ I = sp.eye(nx * ny)
 Z = 0*I
 Re = 10250
 
-L1_big = np.concatenate(
-    (
-        (np.diag(-flat_mean_field[1] @ D1x) + LAP / Re),
-        np.diag(-D1x @ flat_mean_field[0]),
-        -D1x.toarray(),
-    ),
-    axis=1,
+# Convert other dense matrices or vectors to sparse
+flat_mean_field_0_sparse = sp.diags(flat_mean_field[0])
+flat_mean_field_1_sparse = sp.diags(flat_mean_field[1])
+
+L1_big = sp.hstack(
+    [
+        (flat_mean_field_1_sparse @ -D1x + LAP / Re),
+        -flat_mean_field_0_sparse @ D1x,
+        -D1x
+    ]
 )
 
-L2_big = np.concatenate(
-    (
-        np.diag(-D1y @ flat_mean_field[1]),
-        (np.diag(-flat_mean_field[0] @ D1y) + LAP / Re),
-        -D1y.toarray(),
-    ),
-    axis=1,
+L2_big = sp.hstack(
+    [
+        -flat_mean_field_1_sparse @ D1y,
+        (flat_mean_field_0_sparse @ -D1y + LAP / Re),
+        -D1y
+    ]
 )
 
-L3_big = np.concatenate((D1x.toarray(), D1y.toarray(), Z), axis=1)
+L3_big = sp.hstack([D1x, D1y, Z])  # Assuming Z is already a sparse matrix
 
-# L4_big = np.concatenate((D1y.toarray(), D1y.toarray(), Z), axis=1)
+L_big = sp.vstack([L1_big, L2_big, L3_big])
+# print("The memory size of numpy array arr is:", L_big.itemsize * L_big.size / 1e9, "GB")
+sp.save_npz("stationary/10k/L_big.npy", L_big)
 
-L_big = np.concatenate((L1_big, L2_big, L3_big), axis=0)
-print("The memory size of numpy array arr is:", L_big.itemsize * L_big.size / 1e9, "GB")
-np.save("stationary/10k/L_big.npy", L_big)
+# big_flucs = flat_flucs.reshape(3 * nx * ny, nt)#.repeat(3, axis=0)
+# L_big.shape, big_flucs.shape
 
-big_flucs = flat_flucs.reshape(3 * nx * ny, nt)#.repeat(3, axis=0)
-L_big.shape, big_flucs.shape
+# Lq = (L_big @ big_flucs)
+# # Test the product with the discrete operator
+# # test_field = flat_flucs.reshape(3, nx, ny, nt)
+# test_field = Lq.reshape(3, nx, ny, nt)
+# lim = [-2.5, 2.5]
+# fig, ax = plt.subplots(figsize=(5, 4))
+# levels = np.linspace(lim[0], lim[1], 44)
+# _cmap = sns.color_palette("seismic", as_cmap=True)
 
-Lq = (L_big @ big_flucs)
-# Test the product with the discrete operator
-# Reshape Lq
-Lq.resize(3, nx*ny, nt)
-Lq.resize(3, nx, ny, nt)
+# cont = ax.contourf(
+#     pxs,
+#     pys,
+#     test_field[0, :, :, 6].T,
+#     levels=levels,
+#     vmin=lim[0],
+#     vmax=lim[1],
+#     # norm=norm,
+#     cmap=_cmap,
+#     extend="both",
+# )
 
-lim = [-1, 1]
-fig, ax = plt.subplots(figsize=(5, 4))
-levels = np.linspace(lim[0], lim[1], 44)
-_cmap = sns.color_palette("seismic", as_cmap=True)
+# ax.set_aspect(1)
+# ax.set(xlabel=r"$x$", ylabel=r"$y$")
 
-te_field = Lq[0, :, :, :]
-
-cont = ax.contourf(
-    pxs,
-    pys,
-    te_field[:, :, 6].T,
-    levels=levels,
-    vmin=lim[0],
-    vmax=lim[1],
-    # norm=norm,
-    cmap=_cmap,
-    extend="both",
-)
-
-ax.set_aspect(1)
-ax.set(xlabel=r"$x$", ylabel=r"$y$")
-
-plt.savefig("stationary/figures/test_u.pdf")
-plt.close()
-
-sec = te_field
-fig, ax = plt.subplots(figsize=(5, 4))
-levels = np.linspace(lim[0], lim[1], 44)
-
-cont = ax.contourf(
-    pxs,
-    pys,
-    sec[:, :, 0].T,
-    levels=levels,
-    vmin=lim[0],
-    vmax=lim[1],
-    # norm=norm,
-    cmap=_cmap,
-    extend="both",
-)
-
-ax.set_aspect(1)
-ax.set(xlabel=r"$x$", ylabel=r"$y$")  # , title=r"$\phi_{" + str(m) + r"}$")
+# plt.savefig("stationary/figures/u_fullop.pdf")
+# plt.close()
 
 
-def animate(i):
-    global cont
-    for c in cont.collections:
-        c.remove()
-    cont = plt.contourf(
-        pxs,
-        pys,
-        sec[:, :, i].T,
-        levels=levels,
-        vmin=lim[0],
-        vmax=lim[1],
-        # norm=norm,
-        cmap=_cmap,
-        extend="both",
-    )
-    return cont.collections
+# def animate(i):
+#     global cont
+#     for c in cont.collections:
+#         c.remove()
+#     cont = plt.contourf(
+#         pxs,
+#         pys,
+#         sec[:, :, i].T,
+#         levels=levels,
+#         vmin=lim[0],
+#         vmax=lim[1],
+#         # norm=norm,
+#         cmap=_cmap,
+#         extend="both",
+#     )
+#     return cont.collections
 
 
-anim = animation.FuncAnimation(
-    fig, animate, frames=nt, interval=30, blit=True, repeat=False
-)
+# anim = animation.FuncAnimation(
+#     fig, animate, frames=nt, interval=30, blit=True, repeat=False
+# )
 
-anim.save(f"stationary/figures/test_u.gif", fps=5, bitrate=-1, dpi=400)
+# anim.save(f"stationary/figures/test_u.gif", fps=5, bitrate=-1, dpi=400)
 
+# A = 1j*6*sp.eye(L_big.shape[0])- L_big
+
+# Ainv = spsolve(A, sp.eye(A.shape[0]).tocsc())
 
 omegaspan = np.linspace(1,20*np.pi)
 Sigma =[]
 for omega in tqdm(omegaspan):
-    H = np.linalg.inv(1j*omega*np.eye(L_big.shape[0])- L_big)
-    S = np.linalg.svd(H, compute_uv=False)
+    H = 1j*omega*sp.eye(L_big.shape[0])- L_big
+    Hinv = spsolve(H, sp.eye(H.shape[0]).tocsc())
+    S = svds(H, return_singular_vectors=False)
     Sigma.append(S)
 
 fig, ax = plt.subplots(figsize=(3, 3))
@@ -322,3 +304,5 @@ ax.loglog(omegaspan, np.array(Sigma)[:,2])
 
 plt.savefig(f"./stationary/figures/fullRAgain.pdf", dpi=600)
 plt.close()
+
+
