@@ -25,7 +25,7 @@ def create_grad_operator_y(nx, ny, dy):
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 2] = -2
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 3] = 0.5
 
-    return grad_operator.tocsr() / dy
+    return grad_operator.tocsc() / dy
 
 
 def create_grad_operator_x(nx, ny, dx):
@@ -48,7 +48,7 @@ def create_grad_operator_x(nx, ny, dx):
         grad_operator[bc - idx, bc - idx] = 1.5
         grad_operator[bc - idx, bc - idx - ny] = -2
         grad_operator[bc - idx, bc - idx - 2 * ny] = 0.5
-    return grad_operator.tocsr() / dx
+    return grad_operator.tocsc() / dx
 
 
 def create_laplacian_operator_x(nx, ny, dx=1):
@@ -73,7 +73,7 @@ def create_laplacian_operator_x(nx, ny, dx=1):
         laplacian_operator[bc - idx, bc - idx - ny] = -5
         laplacian_operator[bc - idx, bc - idx - 2 * ny] = 4
         laplacian_operator[bc - idx, bc - idx - 3 * ny] = -1
-    return laplacian_operator.tocsr() / (dx**2)
+    return laplacian_operator.tocsc() / (dx**2)
 
 
 def create_laplacian_operator_y(nx, ny, dy):
@@ -97,4 +97,4 @@ def create_laplacian_operator_y(nx, ny, dy):
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 2] = -5
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 3] = 4
         grad_operator[-idx * (ny) - 1, -idx * (ny) - 4] = -1
-    return grad_operator.tocsr() / (dy**2)
+    return grad_operator.tocsc() / (dy**2)
