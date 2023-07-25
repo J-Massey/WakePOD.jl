@@ -1,0 +1,38 @@
+Running SLURM prolog script on ruby017.cluster.local
+===============================================================================
+Job started on Tue Jul 25 10:16:21 BST 2023
+Job ID          : 4278311
+Job name        : rand-RA
+WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
+Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/genSub
+Partition       : amd
+Num hosts       : 4
+Num cores       : 256
+Num of tasks    : 256
+Hosts allocated : ruby[017,019,021,023]
+Job Output Follows ...
+===============================================================================
+Starting calculation at Tue Jul 25 10:16:21 BST 2023
+---------------------------------------------------------------
+Flucs done
+  0%|          | 0/40 [00:00<?, ?it/s]/tmp/slurmd/job4278311/slurm_script: line 22: 13002 Killed                  python src/full-RA-stationary.py
+==============================================================================
+Running epilogue script on ruby017.
+
+Submit time  : 2023-07-25T10:04:50
+Start time   : 2023-07-25T10:16:20
+End time     : 2023-07-25T10:48:59
+Elapsed time : 00:32:39 (Timelimit=20:00:00)
+
+Job ID: 4278311
+Cluster: i5
+User/Group: jmom1n15/mm
+State: FAILED (exit code 137)
+Nodes: 4
+Cores per node: 64
+CPU Utilized: 1-05:03:52
+CPU Efficiency: 20.86% of 5-19:18:24 core-walltime
+Job Wall-clock time: 00:32:39
+Memory Utilized: 220.61 GB
+Memory Efficiency: 24.51% of 900.00 GB
+

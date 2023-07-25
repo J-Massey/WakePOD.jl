@@ -1,0 +1,37 @@
+Running SLURM prolog script on ruby011.cluster.local
+===============================================================================
+Job started on Tue Jul 25 10:53:02 BST 2023
+Job ID          : 4278503
+Job name        : SPOD
+WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
+Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/SPODSub
+Partition       : amd
+Num hosts       : 4
+Num cores       : 256
+Num of tasks    : 256
+Hosts allocated : ruby[011,024,026-027]
+Job Output Follows ...
+===============================================================================
+Starting calculation at Tue Jul 25 10:53:02 BST 2023
+---------------------------------------------------------------
+/tmp/slurmd/job4278503/slurm_script: line 23: 13751 Killed                  python src/SPOD-stationary.py
+==============================================================================
+Running epilogue script on ruby011.
+
+Submit time  : 2023-07-25T10:41:14
+Start time   : 2023-07-25T10:53:01
+End time     : 2023-07-25T10:57:15
+Elapsed time : 00:04:14 (Timelimit=07:00:00)
+
+Job ID: 4278503
+Cluster: i5
+User/Group: jmom1n15/mm
+State: FAILED (exit code 137)
+Nodes: 4
+Cores per node: 64
+CPU Utilized: 00:03:55
+CPU Efficiency: 0.36% of 18:03:44 core-walltime
+Job Wall-clock time: 00:04:14
+Memory Utilized: 229.61 GB
+Memory Efficiency: 25.51% of 900.00 GB
+

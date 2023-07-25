@@ -50,9 +50,9 @@ for t in range(nt):
 print("Flucs done")
 
 means = np.array([u_mean, v_mean, p_mean])
-flucs_field = np.array([u_flucs, v_flucs, p_flucs])
 flat_mean_field = means.reshape(3, nx * ny)
-flat_flucs = flucs_field.reshape(3, nx * ny, nt)
+flucs_field = np.array([u_flucs, v_flucs, p_flucs])
+flatflucs = flucs_field.reshape(3, nx * ny, nt)
 
 def ensure_csc_format(matrix):
     """Ensure that the input matrix is in the csc format.
@@ -106,7 +106,7 @@ L_big = ensure_csc_format(sp.vstack([L1_big, L2_big, L3_big]))
 sp.save_npz("stationary/10k/L_big.npy", L_big)
 
 
-def randomised_gain(Lq: sp.spmatrix, omega: float, k=10):
+def randomised_gain(Lq: sp.spmatrix, omega: float, k=50):
     m = Lq.shape[0]
     I = sp.eye(m)
     H = -1j*omega*I - Lq

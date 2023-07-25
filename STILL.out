@@ -1,7 +1,7 @@
-Running SLURM prolog script on ruby012.cluster.local
+Running SLURM prolog script on ruby017.cluster.local
 ===============================================================================
-Job started on Mon Jul 17 11:30:16 BST 2023
-Job ID          : 4012850
+Job started on Tue Jul 25 09:42:19 BST 2023
+Job ID          : 4276984
 Job name        : SPOD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/statSPODSub
@@ -9,201 +9,29 @@ Partition       : amd
 Num hosts       : 4
 Num cores       : 256
 Num of tasks    : 256
-Hosts allocated : ruby[012,016,025-026]
+Hosts allocated : ruby[017-019,021]
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Mon Jul 17 11:30:16 BST 2023
+Starting calculation at Tue Jul 25 09:42:19 BST 2023
 ---------------------------------------------------------------
-Loaded
-Plotted
---------------------------------------
-SPOD starts...
---------------------------------------
-Using user specified method...
-Using default weight...
-Using user specified nDFT ...
-Using default Hamming window...
-Using default nOvlp...
---------------------------------------
-SPOD parameters summary:
---------------------------------------
-number of DFT points : 256
-number of blocks is  : 10
-number of overlap is : 128
-Window function      : Hamming
-Weight function      : unity
-Running method       : fast
---------------------------------------
-Calculating temporal DFT
---------------------------------------
-block 1 / 10 ( 1 : 256 )
-block 2 / 10 ( 129 : 384 )
-block 3 / 10 ( 257 : 512 )
-block 4 / 10 ( 385 : 640 )
-block 5 / 10 ( 513 : 768 )
-block 6 / 10 ( 641 : 896 )
-block 7 / 10 ( 769 : 1024 )
-block 8 / 10 ( 897 : 1152 )
-block 9 / 10 ( 1025 : 1280 )
-block 10 / 10 ( 1153 : 1408 )
---------------------------------------
-Calculating SPOD
---------------------------------------
-Frequency 1 / 129 (f = 0.000 )
-Frequency 2 / 129 (f = 0.855 )
-Frequency 3 / 129 (f = 1.710 )
-Frequency 4 / 129 (f = 2.565 )
-Frequency 5 / 129 (f = 3.420 )
-Frequency 6 / 129 (f = 4.275 )
-Frequency 7 / 129 (f = 5.129 )
-Frequency 8 / 129 (f = 5.984 )
-Frequency 9 / 129 (f = 6.839 )
-Frequency 10 / 129 (f = 7.694 )
-Frequency 11 / 129 (f = 8.549 )
-Frequency 12 / 129 (f = 9.404 )
-Frequency 13 / 129 (f = 10.259 )
-Frequency 14 / 129 (f = 11.114 )
-Frequency 15 / 129 (f = 11.969 )
-Frequency 16 / 129 (f = 12.824 )
-Frequency 17 / 129 (f = 13.679 )
-Frequency 18 / 129 (f = 14.533 )
-Frequency 19 / 129 (f = 15.388 )
-Frequency 20 / 129 (f = 16.243 )
-Frequency 21 / 129 (f = 17.098 )
-Frequency 22 / 129 (f = 17.953 )
-Frequency 23 / 129 (f = 18.808 )
-Frequency 24 / 129 (f = 19.663 )
-Frequency 25 / 129 (f = 20.518 )
-Frequency 26 / 129 (f = 21.373 )
-Frequency 27 / 129 (f = 22.228 )
-Frequency 28 / 129 (f = 23.083 )
-Frequency 29 / 129 (f = 23.938 )
-Frequency 30 / 129 (f = 24.792 )
-Frequency 31 / 129 (f = 25.647 )
-Frequency 32 / 129 (f = 26.502 )
-Frequency 33 / 129 (f = 27.357 )
-Frequency 34 / 129 (f = 28.212 )
-Frequency 35 / 129 (f = 29.067 )
-Frequency 36 / 129 (f = 29.922 )
-Frequency 37 / 129 (f = 30.777 )
-Frequency 38 / 129 (f = 31.632 )
-Frequency 39 / 129 (f = 32.487 )
-Frequency 40 / 129 (f = 33.342 )
-Frequency 41 / 129 (f = 34.196 )
-Frequency 42 / 129 (f = 35.051 )
-Frequency 43 / 129 (f = 35.906 )
-Frequency 44 / 129 (f = 36.761 )
-Frequency 45 / 129 (f = 37.616 )
-Frequency 46 / 129 (f = 38.471 )
-Frequency 47 / 129 (f = 39.326 )
-Frequency 48 / 129 (f = 40.181 )
-Frequency 49 / 129 (f = 41.036 )
-Frequency 50 / 129 (f = 41.891 )
-Frequency 51 / 129 (f = 42.746 )
-Frequency 52 / 129 (f = 43.600 )
-Frequency 53 / 129 (f = 44.455 )
-Frequency 54 / 129 (f = 45.310 )
-Frequency 55 / 129 (f = 46.165 )
-Frequency 56 / 129 (f = 47.020 )
-Frequency 57 / 129 (f = 47.875 )
-Frequency 58 / 129 (f = 48.730 )
-Frequency 59 / 129 (f = 49.585 )
-Frequency 60 / 129 (f = 50.440 )
-Frequency 61 / 129 (f = 51.295 )
-Frequency 62 / 129 (f = 52.150 )
-Frequency 63 / 129 (f = 53.004 )
-Frequency 64 / 129 (f = 53.859 )
-Frequency 65 / 129 (f = 54.714 )
-Frequency 66 / 129 (f = 55.569 )
-Frequency 67 / 129 (f = 56.424 )
-Frequency 68 / 129 (f = 57.279 )
-Frequency 69 / 129 (f = 58.134 )
-Frequency 70 / 129 (f = 58.989 )
-Frequency 71 / 129 (f = 59.844 )
-Frequency 72 / 129 (f = 60.699 )
-Frequency 73 / 129 (f = 61.554 )
-Frequency 74 / 129 (f = 62.408 )
-Frequency 75 / 129 (f = 63.263 )
-Frequency 76 / 129 (f = 64.118 )
-Frequency 77 / 129 (f = 64.973 )
-Frequency 78 / 129 (f = 65.828 )
-Frequency 79 / 129 (f = 66.683 )
-Frequency 80 / 129 (f = 67.538 )
-Frequency 81 / 129 (f = 68.393 )
-Frequency 82 / 129 (f = 69.248 )
-Frequency 83 / 129 (f = 70.103 )
-Frequency 84 / 129 (f = 70.958 )
-Frequency 85 / 129 (f = 71.812 )
-Frequency 86 / 129 (f = 72.667 )
-Frequency 87 / 129 (f = 73.522 )
-Frequency 88 / 129 (f = 74.377 )
-Frequency 89 / 129 (f = 75.232 )
-Frequency 90 / 129 (f = 76.087 )
-Frequency 91 / 129 (f = 76.942 )
-Frequency 92 / 129 (f = 77.797 )
-Frequency 93 / 129 (f = 78.652 )
-Frequency 94 / 129 (f = 79.507 )
-Frequency 95 / 129 (f = 80.362 )
-Frequency 96 / 129 (f = 81.217 )
-Frequency 97 / 129 (f = 82.071 )
-Frequency 98 / 129 (f = 82.926 )
-Frequency 99 / 129 (f = 83.781 )
-Frequency 100 / 129 (f = 84.636 )
-Frequency 101 / 129 (f = 85.491 )
-Frequency 102 / 129 (f = 86.346 )
-Frequency 103 / 129 (f = 87.201 )
-Frequency 104 / 129 (f = 88.056 )
-Frequency 105 / 129 (f = 88.911 )
-Frequency 106 / 129 (f = 89.766 )
-Frequency 107 / 129 (f = 90.621 )
-Frequency 108 / 129 (f = 91.475 )
-Frequency 109 / 129 (f = 92.330 )
-Frequency 110 / 129 (f = 93.185 )
-Frequency 111 / 129 (f = 94.040 )
-Frequency 112 / 129 (f = 94.895 )
-Frequency 113 / 129 (f = 95.750 )
-Frequency 114 / 129 (f = 96.605 )
-Frequency 115 / 129 (f = 97.460 )
-Frequency 116 / 129 (f = 98.315 )
-Frequency 117 / 129 (f = 99.170 )
-Frequency 118 / 129 (f = 100.025 )
-Frequency 119 / 129 (f = 100.879 )
-Frequency 120 / 129 (f = 101.734 )
-Frequency 121 / 129 (f = 102.589 )
-Frequency 122 / 129 (f = 103.444 )
-Frequency 123 / 129 (f = 104.299 )
-Frequency 124 / 129 (f = 105.154 )
-Frequency 125 / 129 (f = 106.009 )
-Frequency 126 / 129 (f = 106.864 )
-Frequency 127 / 129 (f = 107.719 )
-Frequency 128 / 129 (f = 108.574 )
-Frequency 129 / 129 (f = 109.429 )
---------------------------------------
-Saving SPOD results...
-SPOD results saved to HDF5 file
---------------------------------------
---------------------------------------
-SPOD finished
-Memory usage: 86.77 GB
-Run time    : 1548.08 s
---------------------------------------
+/tmp/slurmd/job4276984/slurm_script: line 23: 14769 Killed                  python src/SPOD-stationary.py
 ==============================================================================
-Running epilogue script on ruby012.
+Running epilogue script on ruby017.
 
-Submit time  : 2023-07-17T11:15:29
-Start time   : 2023-07-17T11:30:15
-End time     : 2023-07-17T11:56:43
-Elapsed time : 00:26:28 (Timelimit=07:00:00)
+Submit time  : 2023-07-25T09:30:19
+Start time   : 2023-07-25T09:42:19
+End time     : 2023-07-25T09:44:59
+Elapsed time : 00:02:40 (Timelimit=07:00:00)
 
-Job ID: 4012850
+Job ID: 4276984
 Cluster: i5
 User/Group: jmom1n15/mm
-State: COMPLETED (exit code 0)
+State: FAILED (exit code 137)
 Nodes: 4
 Cores per node: 64
-CPU Utilized: 01:42:33
-CPU Efficiency: 1.51% of 4-16:55:28 core-walltime
-Job Wall-clock time: 00:26:28
-Memory Utilized: 86.79 GB
-Memory Efficiency: 9.64% of 900.00 GB
+CPU Utilized: 00:02:14
+CPU Efficiency: 0.33% of 11:22:40 core-walltime
+Job Wall-clock time: 00:02:40
+Memory Utilized: 229.44 GB
+Memory Efficiency: 25.49% of 900.00 GB
 
