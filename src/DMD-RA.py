@@ -102,7 +102,7 @@ def compute_SVD(flat_flucs):
     X = flat_flucs[:, :-1]
     Y = flat_flucs[:, 1:]
     # Compute the truncated SVD
-    Ub, sb, Vb = np.linalg.svd(X, full_matrices=False)
+    Ub, sb, Vb = np.linalg.svd(Y, full_matrices=False)
     Uf, sf, Vf = np.linalg.svd(X, full_matrices=False)
     return X,Y,Ub,sb,Vb,Uf,sf,Vf
 
@@ -121,7 +121,7 @@ def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
     V_r = Vf.T[:, :r]
     # Compute the approximated matrix A_approx usinf fbDMD
     Af = U_r.T @ Y @ (V_r @ S_r_inv)
-    A_approx = 1/2 * ()
+    A_approx = 1/2*(Af + np.linalg.inv(Ab))
 
     # Compute the dual eigenvalues and eigenvectors
     rho, W, Wadj = eigen_dual(A_approx, np.eye(r), True)
@@ -149,8 +149,6 @@ def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
 
     return lambdas, Psi, Phi, b
 
-lambdas, Psi, Phi, b = compute_DMD(flat_flucs, dt=dt)
-
 
 def factorize_weights(Q):
     return np.linalg.cholesky(Q)
@@ -168,20 +166,22 @@ def opt_gain_optimized_identity(A, omega_span, m):
 def opt_gain_with_lambda_optimized_identity(V, lambdas, omega_span, m=4):
     A_approx = np.diag(lambdas)
     return opt_gain_optimized_identity(A_approx, omega_span, m)
+rs = np.arange(2, 202, 2)
 
+for r in rs:
+    lambdas, Psi, Phi, b = compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=r, dt=dt)
 
-omegaSpan = np.linspace(1,1000, 2000)
-gain = opt_gain_with_lambda_optimized_identity(Psi, lambdas, omegaSpan)
+    omegaSpan = np.linspace(1,1000, 2000)
+    gain = opt_gain_with_lambda_optimized_identity(Psi, lambdas, omegaSpan)
 
-
-# fig, ax = plt.subplots(figsize = (3,3))
-# ax.set_xlabel(r"$\omega$")
-# ax.set_ylabel(r"$\sigma_i$")
-# # ax.set_xlim(0, 10)
-# for i in range(min(10, 4)):
-#     ax.loglog(omegaSpan, np.sqrt(gain[i, :]))
-# plt.savefig(f"stationary/figures/opt_gain_DMD_{10}.png", dpi=700)
-# plt.close()
+    fig, ax = plt.subplots(figsize = (3,3))
+    ax.set_xlabel(r"$\omega$")
+    ax.set_ylabel(r"$\sigma_i$")
+    # ax.set_xlim(0, 10)
+    for i in range(min(r, 4)):
+        ax.loglog(omegaSpan, np.sqrt(gain[i, :]))
+    plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.png", dpi=700)
+    plt.close()
 
 # max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
 
