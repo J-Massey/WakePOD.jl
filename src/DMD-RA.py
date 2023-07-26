@@ -97,21 +97,31 @@ def eigen_dual(A, Q, log_sort=False):
     
     return λ, V, W
 
-
-def compute_DMD(flat_flucs, r=1000, tol=1e-6, dt=1):
-    # Split the data into X and Y
+def compute_SVD(flat_flucs):
+        # Split the data into X and Y
     X = flat_flucs[:, :-1]
     Y = flat_flucs[:, 1:]
-
     # Compute the truncated SVD
-    U, s, V = np.linalg.svd(X, full_matrices=False)
-    r = min(r, U.shape[1])
-    U_r = U[:, :r]
-    S_r_inv = np.diag(1.0 / s[:r])
-    V_r = V.T[:, :r]
+    Ub, sb, Vb = np.linalg.svd(X, full_matrices=False)
+    Uf, sf, Vf = np.linalg.svd(X, full_matrices=False)
+    return X,Y,Ub,sb,Vb,Uf,sf,Vf
 
-    # Compute the approximated matrix A_approx
-    A_approx = U_r.T @ Y @ (V_r @ S_r_inv)
+X,Y,Ub,sb,Vb,Uf,sf,Vf = compute_SVD(flat_flucs)
+
+
+def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
+    r = min(r, X.shape[1])
+    # Compute the approximated matrix A_approx usinf fbDMD
+    U_r = Ub[:, :r]
+    S_r_inv = np.diag(1.0 / sb[:r])
+    V_r = Vb.T[:, :r]
+    Ab = U_r.T @ Y @ (V_r @ S_r_inv)
+    U_r = Uf[:, :r]
+    S_r_inv = np.diag(1.0 / sf[:r])
+    V_r = Vf.T[:, :r]
+    # Compute the approximated matrix A_approx usinf fbDMD
+    Af = U_r.T @ Y @ (V_r @ S_r_inv)
+    A_approx = 1/2 * ()
 
     # Compute the dual eigenvalues and eigenvectors
     rho, W, Wadj = eigen_dual(A_approx, np.eye(r), True)
