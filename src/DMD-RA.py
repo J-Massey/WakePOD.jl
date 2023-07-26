@@ -113,39 +113,43 @@ def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
     r = min(r, X.shape[1])
     # Compute the approximated matrix A_approx usinf fbDMD
     U_r = Ub[:, :r]
-    S_r_inv = np.diag(1.0 / sb[:r])
-    V_r = Vb.T[:, :r]
-    Ab = U_r.T @ X @ (V_r @ S_r_inv)
+    S_r = np.diag(sb[:r])
+    VT_r = Vb[:r, :]
+    Ab = np.linalg.solve(S_r.T,(U_r.T @ X @ VT_r.T).T).T
     U_r = Uf[:, :r]
-    S_r_inv = np.diag(1.0 / sf[:r])
-    V_r = Vf.T[:, :r]
+    S_r = np.diag(sf[:r])
+    VT_r = Vf[:r, :]
     # Compute the approximated matrix A_approx usinf fbDMD
-    Af = U_r.T @ Y @ (V_r @ S_r_inv)
+    Af = np.linalg.solve(S_r.T,(U_r.T @ Y @ VT_r.T).T).T
     A_approx = 1/2*(Af + np.linalg.inv(Ab))
 
     # Compute the dual eigenvalues and eigenvectors
     rho, W, Wadj = eigen_dual(A_approx, np.eye(r), True)
 
     # Compute matrices Psi and Phi
-    Psi = Y @ (V_r @ (S_r_inv @ W))
+    Psi = np.dot(np.dot(Y, VT_r.T), np.dot(np.linalg.inv(S_r), W))
     Phi = U_r @ Wadj
 
     # Normalize Psi and Phi
-    for i in range(r):
-        Psi[:, i] /= np.sqrt(np.dot(Psi[:, i].T, Psi[:, i]))
-        Phi[:, i] /= np.sqrt(np.dot(Phi[:, i].T, Phi[:, i]))
-        Psi[:, i] /= np.dot(Phi[:, i].T, Psi[:, i])
+    # for i in range(r):
+    #     Psi[:, i] /= np.sqrt(np.dot(Psi[:, i].T, Psi[:, i]))
+    #     Phi[:, i] /= np.sqrt(np.dot(Phi[:, i].T, Phi[:, i]))
+    #     Psi[:, i] /= np.dot(Phi[:, i].T, Psi[:, i])
 
     # Compute vector b
-    b = np.linalg.lstsq(Psi, X[:, 0], rcond=None)[0]
+    try:
+        b = np.linalg.lstsq(Psi, X[:, 0], rcond=None)[0]
 
-    # Filter based on the provided tolerance
-    large = np.abs(b) > tol * np.max(np.abs(b))
-    Psi = Psi[:, large]
-    Phi = Phi[:, large]
-    rho = rho[large]
-    lambdas = np.log(rho) / dt
-    b = b[large]
+        # Filter based on the provided tolerance
+        large = np.abs(b) > tol * np.max(np.abs(b))
+        Psi = Psi[:, large]
+        Phi = Phi[:, large]
+        rho = rho[large]
+        lambdas = np.log(rho) / dt
+        b = b[large]
+    except np.linalg.LinAlgError:
+        b = 0
+        lambdas = np.log(rho) / dt
 
     return lambdas, Psi, Phi, b
 
@@ -166,7 +170,8 @@ def opt_gain_optimized_identity(A, omega_span, m):
 def opt_gain_with_lambda_optimized_identity(V, lambdas, omega_span, m=4):
     A_approx = np.diag(lambdas)
     return opt_gain_optimized_identity(A_approx, omega_span, m)
-rs = np.arange(1, 202, 2)
+rs = np.arange(2, 8, 2)
+rs = [2]
 
 for r in rs:
     lambdas, Psi, Phi, b = compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=r, dt=dt)
@@ -180,7 +185,7 @@ for r in rs:
     # ax.set_xlim(0, 10)
     for i in range(min(r, 4)):
         ax.loglog(omegaSpan, np.sqrt(gain[i, :]))
-    plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.png", dpi=700)
+    plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.pdf", dpi=700)
     plt.close()
 
 # max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
