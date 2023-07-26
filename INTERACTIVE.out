@@ -1,16 +1,17 @@
-Running SLURM prolog script on gold59.cluster.local
+Running SLURM prolog script on ruby059.cluster.local
 ===============================================================================
-Job started on Tue Jul 25 09:24:10 BST 2023
-Job ID          : 4276721
+Job started on Wed Jul 26 11:13:42 BST 2023
+Job ID          : 4299731
 Job name        : DMD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
-Partition       : highmem
+Partition       : amd
 Num hosts       : 1
 Num cores       : 64
 Num of tasks    : 64
-Hosts allocated : gold59
+Hosts allocated : ruby059
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Tue Jul 25 09:24:10 BST 2023
+Starting calculation at Wed Jul 26 11:13:42 BST 2023
 ---------------------------------------------------------------
+/tmp/slurmd/job4299731/slurm_script: line 23: 14527 Killed                  python src/DMD-RA.py

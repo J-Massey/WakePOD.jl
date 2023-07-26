@@ -2,9 +2,9 @@
 
 #SBATCH --ntasks=256
 #SBATCH --nodes=4
-#SBATCH --partition=amd
+#SBATCH --partition=highmem
 #SBATCH --job-name=SPOD
-#SBATCH --time=7:00:00
+#SBATCH --time=10:00:00
 #SBATCH --output=SPOD.out
 #SBATCH --exclusive
 # SBATCH --exclude=ruby035,ruby036,ruby037

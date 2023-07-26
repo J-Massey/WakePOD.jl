@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --ntasks=256
-#SBATCH --nodes=4
+#SBATCH --ntasks=512
+#SBATCH --nodes=8
 # SBATCH --mem=378240
 #SBATCH --partition=amd
 #SBATCH --job-name=rand-RA

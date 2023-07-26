@@ -15,10 +15,8 @@ plt.rcParams["image.cmap"] = "gist_earth"
 def load_and_process_data(filepath):
     data = np.load(filepath)
     data = np.einsum("ijk -> kji", data)
-    return data#[::2, ::2, :]
+    return data[::4, ::4, :]
 
-# Define the slicing pattern as a variable for clarity
-slice_pattern = (slice(None, None, 2), slice(None, None, 2), slice(None, None, 4))
 
 u = load_and_process_data("data/stationary/10k/u.npy")
 v = load_and_process_data("data/stationary/10k/v.npy")
@@ -52,7 +50,7 @@ print("Flucs done")
 
 # means = np.array([u_mean, v_mean, p_mean])
 # flat_mean_field = means.reshape(3, nx * ny)
-flat_flucs = np.stack([u_flucs, v_flucs, p_flucs], axis=0).reshape(3, nx * ny, nt)
+flat_flucs = np.stack([u_flucs, v_flucs, p_flucs], axis=0).reshape(3, nx*ny, nt)
 
 
 # Define inputs for DMD on the vertical velocity
@@ -64,71 +62,56 @@ print("Preprocess done")
 
 # def fbDMD(fluc1,fluc2,k):
 # backwards
-rs = [1,2,3,4,5,6,7,8,9,10] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
-Ub,Sigmab,VTb = svd(fluc2,full_matrices=False)
-Uf, Sigmaf, VTf = svd(fluc1, full_matrices=False)
-# fig, ax = plt.subplots(figsize = (3,3))
-# ax.set_ylabel(r"$\sigma_r/\Sigma \sigma$")
-# ax.set_xlabel(r"$r$")
-# ax.scatter(range(Sigma.size), Sigma/np.sum(Sigma), s=2)
-# plt.savefig("stationary/figures/sigmas.png", dpi=700)
-# plt.close()
-for r in rs:
-    # Sigma_plot(Sigma)
-    U_r = Ub[:,:r]
-    Sigmar = np.diag(Sigmab[:r])
-    VT_r = VTb[:r,:]
-    Atildeb = np.linalg.solve(Sigmar.T,(U_r.T @ fluc1 @ VT_r.T).T).T
+rs = np.arange(2, 42, 2) # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
+Vb,Sigmab,WTb = svd(fluc2,full_matrices=False)
+Vf, Sigmaf, WTf = svd(fluc1, full_matrices=False)
+r = 3
+# for r in rs:
+# Sigma_plot(Sigma)
+V_r = Vb[:,:r]
+Sigmar = np.diag(Sigmab[:r])
+WT_r = WTb[:r,:]
+Atildeb = np.linalg.solve(Sigmar.T,(V_r.T @ fluc1 @ WT_r.T).T).T
 
-    U_r = Uf[:, :r]
-    S_r = np.diag(Sigmaf[:r])
-    VT_r = VTf[:r, :]
-    Atildef = np.linalg.solve(S_r.T,(U_r.T @ fluc2 @ VT_r.T).T).T # Step 2 - Find the linear operator using psuedo inverse
+V_r = Vf[:, :r]
+S_r = np.diag(Sigmaf[:r])
+WT_r = WTf[:r, :]
+Atildef = np.linalg.solve(S_r.T,(V_r.T @ fluc2 @ WT_r.T).T).T # Step 2 - Find the linear operator using psuedo inverse
 
-    A_tilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
-    # A_tilde = np.dot(np.dot(np.dot(U_r.T, fluc2), VT_r.T), np.linalg.inv(S_r))
-    eigvals, W = np.linalg.eig(A_tilde)
+A_tilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
+# A_tilde = np.dot(np.dot(np.dot(V_r.T, fluc2), WT_r.T), np.linalg.inv(S_r))
+eigvals, W = np.linalg.eig(A_tilde)
 
-    V_r = np.dot(np.dot(fluc2, VT_r.T), np.dot(np.linalg.inv(S_r), W))
-    # V_r = fluc2 @ np.linalg.solve(S_r.T,VT_r).T @ W # Step 4 - Modes
+W_r = np.dot(np.dot(fluc2, WT_r.T), np.dot(np.linalg.inv(S_r), W))
+# W_r = fluc2 @ np.linalg.solve(S_r.T,WT_r).T @ W # Step 4 - Modes
 
-    # Q = sp.eye(3 * nx * ny)  # Identity matrix for simplicity, no need for now
 
-    # print("The memory size of Q is:", Q.itemsize * Q.size / 1e9, "GB")
+V_r_star_Q = V_r.conj().T
+V_r_star_Q_V_r = np.dot(V_r_star_Q, V_r)
 
-    V_r_star_Q = V_r.conj().T
-    V_r_star_Q_V_r = np.dot(V_r_star_Q, V_r)
+# Cholesky factorization
+F_tilde = cholesky(V_r_star_Q_V_r)
 
-    # Cholesky factorization
-    F_tilde = cholesky(V_r_star_Q_V_r)
+rho, W = np.linalg.eig(A_tilde) # Step 3 - Eigenvalues
+# Wadj = np.conjugate(W).T
 
-    rho, W = np.linalg.eig(A_tilde) # Step 3 - Eigenvalues
-    # Wadj = np.conjugate(W).T
+Lambda = np.log(eigvals)/dt  # Spectral expansion
 
-    Lambda = np.log(eigvals)/dt  # Spectral expansion
+omegaSpan = np.linspace(1, 1000, 2000)
+gain = np.empty((omegaSpan.size, Lambda.size))
+for idx, omega in tqdm(enumerate(omegaSpan)):
+    R = np.linalg.svd(F_tilde@np.linalg.inv((-1j*omega)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde),
+                    compute_uv=False)
+    gain[idx] = R**2
 
-    fig, ax = plt.subplots(figsize = (3,3))
-    ax.set_xlabel(r"$\Im \lambda_i$")
-    ax.set_ylabel(r"$\Re \lambda_i$")
-    ax.scatter(Lambda.imag, Lambda.real, s=2)
-    plt.savefig("stationary/figures/Lambda.png", dpi=700)
-    plt.close()
-
-    omegaSpan = np.linspace(1, 1000, 2000)
-    gain = np.empty((omegaSpan.size, Lambda.size))
-    for idx, omega in tqdm(enumerate(omegaSpan)):
-        R = np.linalg.svd(F_tilde@np.linalg.inv((-1j*omega)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde),
-                        compute_uv=False)
-        gain[idx] = R**2
-
-    fig, ax = plt.subplots(figsize = (3,3))
-    ax.set_xlabel(r"$\omega$")
-    ax.set_ylabel(r"$\sigma_i$")
-    # ax.set_xlim(0, 10)
-    for i in range(0,4):
-        ax.loglog(omegaSpan, np.sqrt(gain[:, i]))
-    plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.png", dpi=700)
-    plt.close()
+fig, ax = plt.subplots(figsize = (3,3))
+ax.set_xlabel(r"$\omega$")
+ax.set_ylabel(r"$\sigma_i$")
+# ax.set_xlim(0, 10)
+for i in range(min(r, 4)):
+    ax.loglog(omegaSpan, np.sqrt(gain[:, i]))
+plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.png", dpi=700)
+plt.close()
 
 max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
 

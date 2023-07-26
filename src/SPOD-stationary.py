@@ -13,7 +13,7 @@ plt.rcParams["font.size"] = "10.5"
 def load_and_process_data(filepath):
     data = np.load(filepath)
     data = np.einsum("ijk -> kji", data)
-    return data[::2, ::2, :]
+    return data[:, :, :]
 
 u = load_and_process_data("data/stationary/10k/u.npy")
 v = load_and_process_data("data/stationary/10k/v.npy")
