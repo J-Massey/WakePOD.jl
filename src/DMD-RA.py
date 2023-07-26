@@ -60,6 +60,97 @@ fluc2 = flat_flucs[:, 1:]
 
 print("Preprocess done")
 
+# Helper function: adj()
+def adj(A, Q):
+    return np.linalg.lstsq(Q, np.dot(A.T, Q), rcond=None)[0]
+
+# Helper function: normalize_basis()
+def normalize_basis(V, Q):
+    for i in range(V.shape[1]):
+        V[:, i] = V[:, i] / np.sqrt(np.dot(np.dot(V[:, i].T, Q), V[:, i]))
+    return V
+
+# Helper function: eigen_dual()
+def eigen_dual(A, Q, log_sort=False):
+    Aadj = adj(A, Q)
+    
+    if log_sort:
+        λ, V = np.linalg.eig(A)
+        order = np.argsort(np.imag(np.log(λ)))
+        λ = λ[order]
+        V = V[:, order]
+        
+        λ̄, W = np.linalg.eig(Aadj)
+        order_adj = np.argsort(-np.imag(np.log(λ̄)))
+        λ̄ = λ̄[order_adj]
+        W = W[:, order_adj]
+    else:
+        λ, V = np.linalg.eig(A)
+        order = np.argsort(np.imag(λ))
+        λ = λ[order]
+        V = V[:, order]
+        
+        λ̄, W = np.linalg.eig(Aadj)
+        order_adj = np.argsort(-np.real(λ̄))
+        λ̄ = λ̄[order_adj]
+        W = W[:, order_adj]
+    
+    V = normalize_basis(V, Q)
+    W = normalize_basis(W, Q)
+    
+    for i in range(V.shape[1]):
+        V[:, i] = V[:, i] / np.dot(np.dot(W[:, i].T, Q), V[:, i])
+    
+    return λ, V, W
+
+A_test = np.array([[1, 2], [3, 4]])
+Q_test = np.eye(2)
+eigen_dual(A_test, Q_test, True)
+
+def compute_eigensystem_updated(flat_flucs, r=10, tol=1e-6, dt=1):
+    # Split the data into X and Y
+    X = flat_flucs[:, :-1]
+    Y = flat_flucs[:, 1:]
+
+    # Compute the truncated SVD
+    U, s, V = np.linalg.svd(X, full_matrices=False)
+    r = min(r, U.shape[1])
+    U_r = U[:, :r]
+    S_r_inv = np.diag(1.0 / s[:r])
+    V_r = V.T[:, :r]
+
+    # Compute the approximated matrix A_approx
+    A_approx = U_r.T @ Y @ (V_r @ S_r_inv)
+
+    # Compute the dual eigenvalues and eigenvectors
+    rho, W, Wadj = eigen_dual(A_approx, np.eye(r), True)
+
+    # Compute matrices Psi and Phi
+    Psi = Y @ (V_r @ (S_r_inv @ W))
+    Phi = U_r @ Wadj
+
+    # Normalize Psi and Phi
+    for i in range(r):
+        Psi[:, i] /= np.sqrt(np.dot(Psi[:, i].T, Psi[:, i]))
+        Phi[:, i] /= np.sqrt(np.dot(Phi[:, i].T, Phi[:, i]))
+        Psi[:, i] /= np.dot(Phi[:, i].T, Psi[:, i])
+
+    # Compute vector b
+    b = np.linalg.lstsq(Psi, X[:, 0], rcond=None)[0]
+
+    # Filter based on the provided tolerance
+    large = np.abs(b) > tol * np.max(np.abs(b))
+    Psi = Psi[:, large]
+    Phi = Phi[:, large]
+    rho = rho[large]
+    lambdas = np.log(rho) / dt
+    b = b[large]
+
+    return lambdas, Psi, Phi, b
+
+# Test
+compute_eigensystem_updated(flat_flucs)
+
 # def fbDMD(fluc1,fluc2,k):
 # backwards
 rs = np.arange(2, 42, 2) # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
