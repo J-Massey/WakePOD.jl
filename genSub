@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --ntasks=512
-#SBATCH --nodes=8
+#SBATCH --ntasks=128
+#SBATCH --nodes=2
 # SBATCH --mem=378240
 #SBATCH --partition=amd
 #SBATCH --job-name=rand-RA
@@ -19,4 +19,4 @@ module load conda
 source activate an
 module load texlive
 
-python src/full-RA-stationary.py
+python src/DMD-RA-stationary.py

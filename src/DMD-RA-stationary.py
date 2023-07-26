@@ -2,7 +2,6 @@ import numpy as np
 from scipy.linalg import svd, cholesky
 from tqdm import tqdm
 
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 import scienceplots
@@ -15,10 +14,7 @@ plt.rcParams["image.cmap"] = "gist_earth"
 def load_and_process_data(filepath):
     data = np.load(filepath)
     data = np.einsum("ijk -> kji", data)
-    return data#[::2, ::2, :]
-
-# Define the slicing pattern as a variable for clarity
-slice_pattern = (slice(None, None, 2), slice(None, None, 2), slice(None, None, 4))
+    return data[::2, ::2, :]
 
 u = load_and_process_data("data/stationary/10k/u.npy")
 v = load_and_process_data("data/stationary/10k/v.npy")
@@ -50,10 +46,7 @@ for t in range(nt):
 
 print("Flucs done")
 
-# means = np.array([u_mean, v_mean, p_mean])
-# flat_mean_field = means.reshape(3, nx * ny)
 flat_flucs = np.stack([u_flucs, v_flucs, p_flucs], axis=0).reshape(3, nx * ny, nt)
-
 
 # Define inputs for DMD on the vertical velocity
 flat_flucs.resize(3*nx*ny, nt)
@@ -64,15 +57,10 @@ print("Preprocess done")
 
 # def fbDMD(fluc1,fluc2,k):
 # backwards
-rs = [1,2,3,4,5,6,7,8,9,10] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
+rs = [2,4,6,1000] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
 Ub,Sigmab,VTb = svd(fluc2,full_matrices=False)
 Uf, Sigmaf, VTf = svd(fluc1, full_matrices=False)
-# fig, ax = plt.subplots(figsize = (3,3))
-# ax.set_ylabel(r"$\sigma_r/\Sigma \sigma$")
-# ax.set_xlabel(r"$r$")
-# ax.scatter(range(Sigma.size), Sigma/np.sum(Sigma), s=2)
-# plt.savefig("stationary/figures/sigmas.png", dpi=700)
-# plt.close()
+
 for r in rs:
     # Sigma_plot(Sigma)
     U_r = Ub[:,:r]
@@ -86,15 +74,9 @@ for r in rs:
     Atildef = np.linalg.solve(S_r.T,(U_r.T @ fluc2 @ VT_r.T).T).T # Step 2 - Find the linear operator using psuedo inverse
 
     A_tilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
-    # A_tilde = np.dot(np.dot(np.dot(U_r.T, fluc2), VT_r.T), np.linalg.inv(S_r))
     eigvals, W = np.linalg.eig(A_tilde)
 
     V_r = np.dot(np.dot(fluc2, VT_r.T), np.dot(np.linalg.inv(S_r), W))
-    # V_r = fluc2 @ np.linalg.solve(S_r.T,VT_r).T @ W # Step 4 - Modes
-
-    # Q = sp.eye(3 * nx * ny)  # Identity matrix for simplicity, no need for now
-
-    # print("The memory size of Q is:", Q.itemsize * Q.size / 1e9, "GB")
 
     V_r_star_Q = V_r.conj().T
     V_r_star_Q_V_r = np.dot(V_r_star_Q, V_r)
@@ -102,18 +84,7 @@ for r in rs:
     # Cholesky factorization
     F_tilde = cholesky(V_r_star_Q_V_r)
 
-    rho, W = np.linalg.eig(A_tilde) # Step 3 - Eigenvalues
-    # Wadj = np.conjugate(W).T
-
     Lambda = np.log(eigvals)/dt  # Spectral expansion
-
-    fig, ax = plt.subplots(figsize = (3,3))
-    ax.set_xlabel(r"$\Im \lambda_i$")
-    ax.set_ylabel(r"$\Re \lambda_i$")
-    ax.scatter(Lambda.imag, Lambda.real, s=2)
-    plt.savefig("stationary/figures/Lambda.png", dpi=700)
-    plt.close()
-
     omegaSpan = np.linspace(1, 1000, 2000)
     gain = np.empty((omegaSpan.size, Lambda.size))
     for idx, omega in tqdm(enumerate(omegaSpan)):
@@ -125,61 +96,61 @@ for r in rs:
     ax.set_xlabel(r"$\omega$")
     ax.set_ylabel(r"$\sigma_i$")
     # ax.set_xlim(0, 10)
-    for i in range(0,4):
+    for i in range(0,min(r,4)):
         ax.loglog(omegaSpan, np.sqrt(gain[:, i]))
     plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.png", dpi=700)
     plt.close()
 
-max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
+# max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
 
-Psi, Sigma, Phi = np.linalg.svd(F_tilde@np.linalg.inv((-1j*max_gain_om)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde))
+# Psi, Sigma, Phi = np.linalg.svd(F_tilde@np.linalg.inv((-1j*max_gain_om)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde))
 
-forcing = V_r @ np.linalg.inv(F_tilde)*Sigma
-forcing.resize(3, nx*ny, r)
-forcing.resize(3, nx, ny, r)
+# forcing = V_r @ np.linalg.inv(F_tilde)*Sigma
+# forcing.resize(3, nx*ny, r)
+# forcing.resize(3, nx, ny, r)
 
-lim = [-1e-5, 1e-5]
-fig, ax = plt.subplots(figsize=(5, 4))
-levels = np.linspace(lim[0], lim[1], 44)
-_cmap = sns.color_palette("seismic", as_cmap=True)
+# lim = [-1e-5, 1e-5]
+# fig, ax = plt.subplots(figsize=(5, 4))
+# levels = np.linspace(lim[0], lim[1], 44)
+# _cmap = sns.color_palette("seismic", as_cmap=True)
 
-cont = ax.contourf(pxs, pys, forcing[0, :, :, 1].T,
-                            levels=levels,
-                            vmin=lim[0],
-                            vmax=lim[1],
-                            # norm=norm,
-                            cmap=_cmap,
-                            extend="both",
-                        )
+# cont = ax.contourf(pxs, pys, forcing[0, :, :, 1].T,
+#                             levels=levels,
+#                             vmin=lim[0],
+#                             vmax=lim[1],
+#                             # norm=norm,
+#                             cmap=_cmap,
+#                             extend="both",
+#                         )
 
-ax.set_aspect(1)
-ax.set(xlabel=r"$x$", ylabel=r"$y$")
+# ax.set_aspect(1)
+# ax.set(xlabel=r"$x$", ylabel=r"$y$")
 
-plt.savefig("stationary/figures/forcing.png", dpi=700)
-plt.close()
+# plt.savefig("stationary/figures/forcing.png", dpi=700)
+# plt.close()
 
-response = V_r @ np.linalg.inv(F_tilde)@Psi
-response.resize(3, nx*ny, r)
-response.resize(3, nx, ny, r)
+# response = V_r @ np.linalg.inv(F_tilde)@Psi
+# response.resize(3, nx*ny, r)
+# response.resize(3, nx, ny, r)
 
-lim = [-1e-2, 1e-2]
-fig, ax = plt.subplots(figsize=(5, 4))
-levels = np.linspace(lim[0], lim[1], 44)
-_cmap = sns.color_palette("seismic", as_cmap=True)
+# lim = [-1e-2, 1e-2]
+# fig, ax = plt.subplots(figsize=(5, 4))
+# levels = np.linspace(lim[0], lim[1], 44)
+# _cmap = sns.color_palette("seismic", as_cmap=True)
 
-cont = ax.contourf(pxs, pys, response[0, :, :, 1].T,
-                            levels=levels,
-                            vmin=lim[0],
-                            vmax=lim[1],
-                            # norm=norm,
-                            cmap=_cmap,
-                            extend="both",
-                        )
+# cont = ax.contourf(pxs, pys, response[0, :, :, 1].T,
+#                             levels=levels,
+#                             vmin=lim[0],
+#                             vmax=lim[1],
+#                             # norm=norm,
+#                             cmap=_cmap,
+#                             extend="both",
+#                         )
 
-ax.set_aspect(1)
-ax.set(xlabel=r"$x$", ylabel=r"$y$")
+# ax.set_aspect(1)
+# ax.set(xlabel=r"$x$", ylabel=r"$y$")
 
-plt.savefig("stationary/figures/response.png", dpi=700)
-plt.close()
+# plt.savefig("stationary/figures/response.png", dpi=700)
+# plt.close()
 
 
