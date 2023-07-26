@@ -115,7 +115,7 @@ def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
     U_r = Ub[:, :r]
     S_r_inv = np.diag(1.0 / sb[:r])
     V_r = Vb.T[:, :r]
-    Ab = U_r.T @ Y @ (V_r @ S_r_inv)
+    Ab = U_r.T @ X @ (V_r @ S_r_inv)
     U_r = Uf[:, :r]
     S_r_inv = np.diag(1.0 / sf[:r])
     V_r = Vf.T[:, :r]
@@ -166,7 +166,7 @@ def opt_gain_optimized_identity(A, omega_span, m):
 def opt_gain_with_lambda_optimized_identity(V, lambdas, omega_span, m=4):
     A_approx = np.diag(lambdas)
     return opt_gain_optimized_identity(A_approx, omega_span, m)
-rs = np.arange(2, 202, 2)
+rs = np.arange(1, 202, 2)
 
 for r in rs:
     lambdas, Psi, Phi, b = compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=r, dt=dt)
