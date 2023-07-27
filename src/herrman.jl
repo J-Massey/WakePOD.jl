@@ -12,19 +12,12 @@ function normalize_basis(V,Q)
     return V
 end
 
-function eigen_dual(A,Q,log_sort::Bool=false)
-    Aadj = adj(A,Q)
-    if log_sort
-        λ, V = eigen(A, sortby=x->imag(log(x)))
-        λ̄, W = eigen(Aadj, sortby=x->-imag(log(x)))
-        p = sortperm(-real(log.(λ)))
-        p̄ = sortperm(-real(log.(λ̄)))
-    else
-        λ, V = eigen(A, sortby=x->imag(x))
-        λ̄, W = eigen(Aadj, sortby=x->-imag(x))
-        p = sortperm(-real(λ))
-        p̄ = sortperm(-real(λ̄))
-    end
+function eigen_dual(A,Q)
+    Aadj = A.T
+    λ, V = eigen(A, sortby=x->imag(x))
+    λ̄, W = eigen(Aadj, sortby=x->-imag(x))
+    p = sortperm(-real(λ))
+    p̄ = sortperm(-real(λ̄))
     V = V[:,p]
     λ = λ[p]
     W = W[:,p̄]
