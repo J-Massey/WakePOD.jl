@@ -24,81 +24,54 @@ p = load_and_process_data("data/stationary/10k/p.npy")
 xlims, ylims = (-0.35, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
 
-T = 15  # number of cycles
+T = 15
 dt = T / nt
 
-pxs = np.linspace(*xlims, nx)
-dx = np.diff(pxs).mean()
+# Compute fluctuations in a vectorized manner
+u_mean = u.mean(axis=2, keepdims=True)
+v_mean = v.mean(axis=2, keepdims=True)
+p_mean = p.mean(axis=2, keepdims=True)
+u_flucs = u - u_mean
+v_flucs = v - v_mean
+p_flucs = p - p_mean
 
-pys = np.linspace(*ylims, ny)
-dy = np.diff(pys).mean()
-
-# Reynolds decomposition
-u_flucs = np.empty_like(u)
-v_flucs = np.empty_like(v)
-p_flucs = np.empty_like(p)
-u_mean = u.mean(axis=2)
-v_mean = v.mean(axis=2)
-p_mean = p.mean(axis=2)
-for t in range(nt):
-    u_flucs[:, :, t] = u[:, :, t] - u_mean
-    v_flucs[:, :, t] = v[:, :, t] - v_mean
-    p_flucs[:, :, t] = p[:, :, t] - p_mean
-
-print("Flucs done")
-
-flat_flucs = np.stack([u_flucs, v_flucs, p_flucs], axis=0).reshape(3, nx*ny, nt)
-
-# Define inputs for DMD on the vertical velocity
-flat_flucs.resize(3*nx*ny, nt)
+flat_flucs = np.concatenate([u_flucs, v_flucs, p_flucs], axis=0).reshape(3 * nx * ny, nt)
 
 print("Preprocess done")
 
-# Helper function: adj()
-def adj(A: np.ndarray, Q: np.ndarray) -> np.ndarray:
-    return np.linalg.lstsq(Q, np.dot(A.T, Q), rcond=None)[0]
 
-# Helper function: normalize_basis()
-def normalise_basis(V: np.ndarray, Q: np.ndarray) -> np.ndarray:
-    for i in range(V.shape[1]):
-        V[:, i] = V[:, i] / np.sqrt(np.dot(np.dot(V[:, i].T, Q), V[:, i]))
-    return V
+def normalise_basis(V: np.ndarray):
+    # Normalization with respect to identity matrix Q
+    V_norms = np.linalg.norm(V, axis=0)
+    V_normalised = V / V_norms
+    return V_normalised
 
-# Helper function: eigen_dual()
-def eigen_dual(A: np.ndarray, Q: np.ndarray, log_sort: bool = False):
-    Aadj = adj(A, Q)
+
+def eigen_dual(A: np.ndarray):
+    # Compute eigen decomposition of A
+    lambda_vals, V = np.linalg.eig(A)
+    # Sort eigenvalues and eigenvectors by the real part
+    p = np.argsort(-np.real(lambda_vals))
+    lambda_vals = lambda_vals[p]
+    V = V[:, p]
     
-    if log_sort:
-        λ: np.ndarray = np.empty(A.shape[0], dtype=complex)
-        V: np.ndarray = np.empty(A.shape, dtype=complex)
-        W: np.ndarray = np.empty(A.shape, dtype=complex)
-        
-        λ̄: np.ndarray = np.empty(A.shape[0], dtype=complex)
-        W̄: np.ndarray = np.empty(A.shape, dtype=complex)
-    else:
-        λ: np.ndarray = np.empty(A.shape[0], dtype=complex)
-        V: np.ndarray = np.empty(A.shape, dtype=complex)
-        W: np.ndarray = np.empty(A.shape, dtype=complex)
-        
-        λ̄: np.ndarray = np.empty(A.shape[0], dtype=complex)
-        W̄: np.ndarray = np.empty(A.shape, dtype=complex)
+    # Compute eigen decomposition of A.T
+    lambda_bar, W = np.linalg.eig(A.T)
+    # Sort eigenvalues and eigenvectors by the real part
+    p_bar = np.argsort(-np.real(lambda_bar))
+    lambda_bar = lambda_bar[p_bar]
+    W = W[:, p_bar]
     
-    for i in range(A.shape[0]):
-        for j in range(A.shape[0]):
-            λ[i], V[:, i] = np.linalg.eig(A)
-            order = np.argsort(np.imag(λ))
-            λ = λ[order]
-            V = V[:, order]
-            
-            λ̄[i], W[:, i] = np.linalg.eig(Aadj)
-            order_adj = np.argsort(-np.imag(λ̄))
-            λ̄ = λ̄[order_adj]
-            W = W[:, order_adj]
+    # Normalization using the simplified function
+    V = normalise_basis(V)
+    W = normalise_basis(W)
     
+    # Additional normalization
     for i in range(V.shape[1]):
-        V[:, i] = V[:, i] / np.dot(np.dot(W[:, i].T, Q), V[:, i])
-    
-    return λ, V, W
+        V[:, i] = V[:, i] / np.dot(W[:, i], V[:, i])
+        
+    return lambda_vals, V, W
+
 
 def compute_SVD(flat_flucs: np.ndarray):
         # Split the data into X and Y
@@ -153,11 +126,8 @@ def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
     return lambdas, Psi, Phi, b
 
 
-def factorize_weights(Q):
-    return np.linalg.cholesky(Q)
-
-
-def opt_gain_optimized_identity(A, omega_span, m):
+def opt_gain(lambdas, omega_span, m=4):
+    A = np.diag(lambdas)
     R = []
     for omega in omega_span:
         singular_vals = np.linalg.svd(np.linalg.inv(-1j * omega * np.eye(A.shape[0]) - A), compute_uv=False)
@@ -166,9 +136,7 @@ def opt_gain_optimized_identity(A, omega_span, m):
     return R
 
 
-def opt_gain_with_lambda_optimized_identity(V, lambdas, omega_span, m=4):
-    A_approx = np.diag(lambdas)
-    return opt_gain_optimized_identity(A_approx, omega_span, m)
+# def opt_forcing():
 
 
 rs = [2,4,1000]
@@ -177,7 +145,7 @@ for r in rs:
     lambdas, Psi, Phi, b = compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=r, dt=dt)
 
     omegaSpan = np.linspace(1,1000, 2000)
-    gain = opt_gain_with_lambda_optimized_identity(Psi, lambdas, omegaSpan)
+    gain = opt_gain(lambdas, omegaSpan)
 
     fig, ax = plt.subplots(figsize = (3,3))
     ax.set_xlabel(r"$\omega$")
@@ -187,6 +155,7 @@ for r in rs:
         ax.loglog(omegaSpan, np.sqrt(gain[i, :]))
     plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.png", dpi=700)
     plt.close()
+
 
 # max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
 
