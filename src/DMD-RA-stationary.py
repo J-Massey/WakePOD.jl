@@ -55,36 +55,35 @@ fluc2 = flat_flucs[:, 1:]
 
 print("Preprocess done")
 
-# def fbDMD(fluc1,fluc2,k):
-# backwards
+# Find the left and right singular vectors of the fluctuations
 rs = [2,4,6,1000] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
-Ub,Sigmab,VTb = svd(fluc2,full_matrices=False)
-Uf, Sigmaf, VTf = svd(fluc1, full_matrices=False)
+
+# Based on these data matrices, the DMD framework with a rank-r truncated SVD yields the matrices
+# Where U, V are the approximated direct and adjoint eigenvectors 
+Ub,Sb,VTb = svd(fluc2,full_matrices=False)
+Uf, Sf, VTf = svd(fluc1, full_matrices=False)
 
 for r in rs:
     # Sigma_plot(Sigma)
     U_r = Ub[:,:r]
-    Sigmar = np.diag(Sigmab[:r])
+    S_r = np.diag(Sb[:r])
     VT_r = VTb[:r,:]
-    Atildeb = np.linalg.solve(Sigmar.T,(U_r.T @ fluc1 @ VT_r.T).T).T
+    Ab = np.linalg.solve(S_r.T,(U_r.T @ fluc1 @ VT_r.T).T).T
 
     U_r = Uf[:, :r]
-    S_r = np.diag(Sigmaf[:r])
+    S_r = np.diag(Sf[:r])
     VT_r = VTf[:r, :]
-    Atildef = np.linalg.solve(S_r.T,(U_r.T @ fluc2 @ VT_r.T).T).T # Step 2 - Find the linear operator using psuedo inverse
+    Af = np.linalg.solve(S_r.T,(U_r.T @ fluc2 @ VT_r.T).T).T
+    
+    # Step 2 - Find the linear operator
+    A_tilde = 1/2*(Af + np.linalg.inv(Ab))
 
-    A_tilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
+    # Find the eigenvalues and eigenvectors of A_tilde
     rho, W = np.linalg.eig(A_tilde)
+    # Convert to an eigenfunction using spectral expansion
+    Lambda = np.log(rho)/dt
 
-    V_r = np.dot(np.dot(fluc2, VT_r.T), np.dot(np.linalg.inv(S_r), W))
 
-    V_r_star_Q = V_r.conj().T
-    V_r_star_Q_V_r = np.dot(V_r_star_Q, V_r)
-
-    # Cholesky factorization
-    F_tilde = cholesky(V_r_star_Q_V_r)
-
-    Lambda = np.log(rho)/dt  # Spectral expansion
     omegaSpan = np.linspace(1, 1000, 2000)
     gain = np.empty((omegaSpan.size, Lambda.size))
     for idx, omega in tqdm(enumerate(omegaSpan)):
