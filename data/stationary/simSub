@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#SBATCH --ntasks=64
+#SBATCH --nodes=1
+#SBATCH --partition=amd
+#SBATCH --job-name=smooth-data
+#SBATCH --time=10:00:00
+#SBATCH --output=JOB.out
+# SBATCH --exclude=ruby049
+# SBATCH --dependency=afterok:1908224
+
+echo "Starting calculation at $(date)"
+echo "---------------------------------------------------------------"
+
+module purge
+module load openmpi/4.0.5/amd
+module load conda
+source activate an
+
+python run-2d.py
+python watch_simdir.py
+python bmask.py
+python collect_save.py
+

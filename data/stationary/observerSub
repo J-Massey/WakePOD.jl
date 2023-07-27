@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#SBATCH --ntasks=256
+#SBATCH --nodes=4
+# SBATCH --mem=378240
+#SBATCH --partition=amd
+#SBATCH --job-name=obs
+#SBATCH --time=1:00:00
+#SBATCH --output=OBS.out
+# SBATCH --exclude=gold55
+# SBATCH --dependency=afterok:1908224
+
+echo "Starting calculation at $(date)"
+echo "---------------------------------------------------------------"
+
+module purge
+# module load openmpi/4.0.5/amd
+module load conda
+source activate an
+
+# python watch_simdir.py
+python bmask.py
+python collect_save.py
+# sleep 720000
