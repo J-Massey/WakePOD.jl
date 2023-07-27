@@ -73,35 +73,8 @@ def eigen_dual(A: np.ndarray):
     return lambda_vals, V, W
 
 
-def compute_SVD(flat_flucs: np.ndarray):
-        # Split the data into X and Y
-    X = flat_flucs[:, :-1]
-    Y = flat_flucs[:, 1:]
-    # Compute the truncated SVD
-    Ub, sb, Vb = np.linalg.svd(Y, full_matrices=False)
-    Uf, sf, Vf = np.linalg.svd(X, full_matrices=False)
-    return X,Y,Ub,sb,Vb,Uf,sf,Vf
-
-X,Y,Ub,sb,Vb,Uf,sf,Vf = compute_SVD(flat_flucs)
-
-
-def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
-    r = min(r, X.shape[1])
-    # Compute the approximated matrix A_approx usinf fbDMD
-    U_r = Ub[:, :r]
-    S_r_inv = np.diag(1.0 / sb[:r])
-    V_r = Vb.T[:, :r]
-    Ab = U_r.T @ Y @ (V_r @ S_r_inv)
-    U_r = Uf[:, :r]
-    S_r_inv = np.diag(1.0 / sf[:r])
-    V_r = Vf.T[:, :r]
-    # Compute the approximated matrix A_approx using fbDMD
-    Af = U_r.T @ Y @ (V_r @ S_r_inv)
-    A_approx = 1/2*(Af + np.linalg.inv(Ab))
-
-    # Compute the dual eigenvalues and eigenvectors
-    rho, W, Wadj = eigen_dual(A_approx)
-
+def DMD_modes(A, U_r, S_r_inv, V_r, tol=1e-6):
+    rho, W, Wadj = eigen_dual(A)
     # Compute matrices Psi and Phi
     Psi = Y @ (V_r @ (S_r_inv @ W))
     Phi = U_r @ Wadj
@@ -126,6 +99,40 @@ def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
     return lambdas, Psi, Phi, b
 
 
+def compute_SVD(flat_flucs: np.ndarray):
+        # Split the data into X and Y
+    X = flat_flucs[:, :-1]
+    Y = flat_flucs[:, 1:]
+    # Compute the truncated SVD
+    Ub, sb, Vb = np.linalg.svd(Y, full_matrices=False)
+    Uf, sf, Vf = np.linalg.svd(X, full_matrices=False)
+    return X,Y,Ub,sb,Vb,Uf,sf,Vf
+
+X,Y,Ub,sb,Vb,Uf,sf,Vf = compute_SVD(flat_flucs)
+
+
+def compute_A(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000):
+    r = min(r, X.shape[1])
+    # Compute the approximated matrix A_approx usinf fbDMD
+    U_r = Ub[:, :r]
+    S_r_inv = np.diag(1.0 / sb[:r])
+    V_r = Vb.T[:, :r]
+    Ab = U_r.T @ Y @ (V_r @ S_r_inv)
+    U_r = Uf[:, :r]
+    S_r_inv = np.diag(1.0 / sf[:r])
+    V_r = Vf.T[:, :r]
+    # Compute the approximated matrix A_approx using fbDMD
+    Af = U_r.T @ Y @ (V_r @ S_r_inv)
+    A_approx = 1/2*(Af + np.linalg.inv(Ab))
+    return A_approx
+
+
+def compute_lambda(A, dt):
+    rho, V = np.linalg.eig(A)
+    lam = np.log(rho) / dt
+    return lam
+
+
 def opt_gain(lambdas, omega_span, m=4):
     A = np.diag(lambdas)
     R = []
@@ -136,15 +143,19 @@ def opt_gain(lambdas, omega_span, m=4):
     return R
 
 
-# def opt_forcing():
+def opt_forcing(lambdas, omega):
+    A = np.diag(lambdas)
+    Psi, Sig, Phi = np.linalg.svd(np.linalg.inv(-1j * omega * np.eye(A.shape[0]) - A), full_matrices=False, compute_uv=False)
+    return Psi, Sig, Phi
 
 
-rs = [2,4,1000]
+rs = [2]
 
 for r in rs:
-    lambdas, Psi, Phi, b = compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=r, dt=dt)
+    A = compute_A(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=r)
 
     omegaSpan = np.linspace(1,1000, 2000)
+    lambdas = compute_lambda(A, dt)
     gain = opt_gain(lambdas, omegaSpan)
 
     fig, ax = plt.subplots(figsize = (3,3))
@@ -156,8 +167,9 @@ for r in rs:
     plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.png", dpi=700)
     plt.close()
 
+    max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
+    Psi, Sig, Phi = opt_forcing(lambdas, max_gain_om)
 
-# max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
 
 # Psi, Sigma, Phi = np.linalg.svd(F_tilde@np.linalg.inv((-1j*max_gain_om)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde))
 
