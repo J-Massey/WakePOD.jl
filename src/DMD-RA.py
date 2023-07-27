@@ -100,7 +100,7 @@ def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
     A_approx = 1/2*(Af + np.linalg.inv(Ab))
 
     # Compute the dual eigenvalues and eigenvectors
-    rho, W, Wadj = eigen_dual(A_approx, np.eye(r), True)
+    rho, W, Wadj = eigen_dual(A_approx)
 
     # Compute matrices Psi and Phi
     Psi = Y @ (V_r @ (S_r_inv @ W))
