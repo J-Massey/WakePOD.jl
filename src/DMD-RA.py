@@ -14,7 +14,7 @@ plt.rcParams["image.cmap"] = "gist_earth"
 def load_and_process_data(filepath):
     data = np.load(filepath)
     data = np.einsum("ijk -> kji", data)
-    return data[::4, ::4, :]
+    return data[::2, ::2, :]
 
 
 u = load_and_process_data("data/stationary/10k/u.npy")
@@ -55,49 +55,52 @@ flat_flucs.resize(3*nx*ny, nt)
 print("Preprocess done")
 
 # Helper function: adj()
-def adj(A, Q):
+def adj(A: np.ndarray, Q: np.ndarray) -> np.ndarray:
     return np.linalg.lstsq(Q, np.dot(A.T, Q), rcond=None)[0]
 
 # Helper function: normalize_basis()
-def normalize_basis(V, Q):
+def normalise_basis(V: np.ndarray, Q: np.ndarray) -> np.ndarray:
     for i in range(V.shape[1]):
         V[:, i] = V[:, i] / np.sqrt(np.dot(np.dot(V[:, i].T, Q), V[:, i]))
     return V
 
 # Helper function: eigen_dual()
-def eigen_dual(A, Q, log_sort=False):
+def eigen_dual(A: np.ndarray, Q: np.ndarray, log_sort: bool = False):
     Aadj = adj(A, Q)
     
     if log_sort:
-        λ, V = np.linalg.eig(A)
-        order = np.argsort(np.imag(np.log(λ)))
-        λ = λ[order]
-        V = V[:, order]
+        λ: np.ndarray = np.empty(A.shape[0], dtype=complex)
+        V: np.ndarray = np.empty(A.shape, dtype=complex)
+        W: np.ndarray = np.empty(A.shape, dtype=complex)
         
-        λ̄, W = np.linalg.eig(Aadj)
-        order_adj = np.argsort(-np.imag(np.log(λ̄)))
-        λ̄ = λ̄[order_adj]
-        W = W[:, order_adj]
+        λ̄: np.ndarray = np.empty(A.shape[0], dtype=complex)
+        W̄: np.ndarray = np.empty(A.shape, dtype=complex)
     else:
-        λ, V = np.linalg.eig(A)
-        order = np.argsort(np.imag(λ))
-        λ = λ[order]
-        V = V[:, order]
+        λ: np.ndarray = np.empty(A.shape[0], dtype=complex)
+        V: np.ndarray = np.empty(A.shape, dtype=complex)
+        W: np.ndarray = np.empty(A.shape, dtype=complex)
         
-        λ̄, W = np.linalg.eig(Aadj)
-        order_adj = np.argsort(-np.real(λ̄))
-        λ̄ = λ̄[order_adj]
-        W = W[:, order_adj]
+        λ̄: np.ndarray = np.empty(A.shape[0], dtype=complex)
+        W̄: np.ndarray = np.empty(A.shape, dtype=complex)
     
-    V = normalize_basis(V, Q)
-    W = normalize_basis(W, Q)
+    for i in range(A.shape[0]):
+        for j in range(A.shape[0]):
+            λ[i], V[:, i] = np.linalg.eig(A)
+            order = np.argsort(np.imag(λ))
+            λ = λ[order]
+            V = V[:, order]
+            
+            λ̄[i], W[:, i] = np.linalg.eig(Aadj)
+            order_adj = np.argsort(-np.imag(λ̄))
+            λ̄ = λ̄[order_adj]
+            W = W[:, order_adj]
     
     for i in range(V.shape[1]):
         V[:, i] = V[:, i] / np.dot(np.dot(W[:, i].T, Q), V[:, i])
     
     return λ, V, W
 
-def compute_SVD(flat_flucs):
+def compute_SVD(flat_flucs: np.ndarray):
         # Split the data into X and Y
     X = flat_flucs[:, :-1]
     Y = flat_flucs[:, 1:]
@@ -119,7 +122,7 @@ def compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=1000, tol=1e-6, dt=1):
     U_r = Uf[:, :r]
     S_r_inv = np.diag(1.0 / sf[:r])
     V_r = Vf.T[:, :r]
-    # Compute the approximated matrix A_approx usinf fbDMD
+    # Compute the approximated matrix A_approx using fbDMD
     Af = U_r.T @ Y @ (V_r @ S_r_inv)
     A_approx = 1/2*(Af + np.linalg.inv(Ab))
 
@@ -166,7 +169,9 @@ def opt_gain_optimized_identity(A, omega_span, m):
 def opt_gain_with_lambda_optimized_identity(V, lambdas, omega_span, m=4):
     A_approx = np.diag(lambdas)
     return opt_gain_optimized_identity(A_approx, omega_span, m)
-rs = np.arange(2, 202, 2)
+
+
+rs = [2,4,1000]
 
 for r in rs:
     lambdas, Psi, Phi, b = compute_DMD(X,Y,Ub,sb,Vb,Uf,sf,Vf, r=r, dt=dt)
