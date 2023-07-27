@@ -1,0 +1,51 @@
+Running SLURM prolog script on ruby003.cluster.local
+===============================================================================
+Job started on Thu Jul 27 15:45:35 BST 2023
+Job ID          : 4328288
+Job name        : smooth-data
+WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming
+Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming/simSub
+Partition       : amd
+Num hosts       : 4
+Num cores       : 256
+Num of tasks    : 256
+Hosts allocated : ruby[003-004,008,011]
+Job Output Follows ...
+===============================================================================
+Starting calculation at Thu Jul 27 15:45:35 BST 2023
+---------------------------------------------------------------
+make: Entering directory `/mainfs/home/jmom1n15/Lotus/solver/src/geom'
+make: `libgeom.a' is up to date.
+make: Leaving directory `/mainfs/home/jmom1n15/Lotus/solver/src/geom'
+make: Entering directory `/mainfs/home/jmom1n15/Lotus/solver/src/oop'
+make: `libfluid.a' is up to date.
+make: Leaving directory `/mainfs/home/jmom1n15/Lotus/solver/src/oop'
+mpif90 -cpp -DMPION  -Ofast -funroll-loops --param max-unroll-times=4  -I/home/jmom1n15/Lotus/solver/src/oop -I/home/jmom1n15/Lotus/solver/src/geom/geom_lib_include -c lotus.f90
+mpif90 -cpp -DMPION  -Ofast -funroll-loops --param max-unroll-times=4  -o lotus lotus.o -L/home/jmom1n15/Lotus/solver/src/oop/. -L/home/jmom1n15/Lotus/solver/src/geom/. -lfluid -lgeom
+ Setting up the grid, body and fluid
+ -----------------------------------
+composite(4096.0)=4096
+  products :1*2**12
+composite(4096.0)=4096
+  products :1*2**12
+composite(.0)=1
+ Stretched grid sections:
+  negative: r= 0.4%, h_max=22.8
+  positive: r= 0.4%, h_max=16.9
+ grid symmetry:  F
+ Stretched grid sections:
+  negative: r= 0.6%, h_max=33.7
+  positive: r= 0.6%, h_max=33.7
+ grid symmetry:  T
+ Starting time update loop
+ -----------------------------------
+Time:          0.000
+Time:          1.000
+Time:          2.000
+Time:          3.000
+Time:          4.000
+Time:          5.000
+Time:          6.000
+Time:          7.000
+Time:          8.000
+Time:          9.000

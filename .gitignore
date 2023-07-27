@@ -22,6 +22,8 @@ docs/site/
 # committed for packages, but should be committed for applications that require a static
 # environment.
 Manifest.toml
+
+# Big files
 mpi.csv
 high-dim-flow.ipynb
 Phi*.png
@@ -35,3 +37,8 @@ U*.png
 *.pdf
 *.npy
 *.npz
+*.vti
+*.vtr
+*.pvd
+*.pvti
+*.pvtr
