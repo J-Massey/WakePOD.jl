@@ -49,3 +49,29 @@ Time:          6.000
 Time:          7.000
 Time:          8.000
 Time:          9.000
+Time:         10.000
+Time:         11.000
+Time:         12.000
+Time:         13.000
+Time:         14.000
+Time:         15.000
+Time:         16.000
+Time:         17.000
+Time:         18.000
+Time:         19.000
+Time:         20.000
+ Loop complete: writing restart files and exiting
+ -----------------------------------
+Number of proccessors :256
+Run folder            :/mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming/lotus-data
+No read folder
+Folder /mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming/lotus-data exists!
+Moving contents to trash
+Setting up in /mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming/lotus-data
+No postprocessing set up
+No stopping criteria, the simulation will run its course
+Making executable 
+Finished executable 
+Running executable 
+Run all python files for postprocessing
+Popping back up
