@@ -74,7 +74,7 @@ for r in rs:
     Atildef = np.linalg.solve(S_r.T,(U_r.T @ fluc2 @ VT_r.T).T).T # Step 2 - Find the linear operator using psuedo inverse
 
     A_tilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
-    eigvals, W = np.linalg.eig(A_tilde)
+    rho, W = np.linalg.eig(A_tilde)
 
     V_r = np.dot(np.dot(fluc2, VT_r.T), np.dot(np.linalg.inv(S_r), W))
 
@@ -84,7 +84,7 @@ for r in rs:
     # Cholesky factorization
     F_tilde = cholesky(V_r_star_Q_V_r)
 
-    Lambda = np.log(eigvals)/dt  # Spectral expansion
+    Lambda = np.log(rho)/dt  # Spectral expansion
     omegaSpan = np.linspace(1, 1000, 2000)
     gain = np.empty((omegaSpan.size, Lambda.size))
     for idx, omega in tqdm(enumerate(omegaSpan)):
