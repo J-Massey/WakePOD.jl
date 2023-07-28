@@ -1,10 +1,10 @@
 #!/bin/bash
-
 #SBATCH --ntasks=64
 #SBATCH --nodes=1
-#SBATCH --partition=highmem
+# SBATCH --mem=243200
+#SBATCH --partition=amd
 #SBATCH --job-name=DMD
-#SBATCH --time=10:00:00
+#SBATCH --time=5:00:00
 #SBATCH --output=INTERACTIVE.out
 # SBATCH --exclusive
 # SBATCH --exclude=ruby035,ruby036,ruby037
@@ -20,5 +20,5 @@ module load conda
 source activate an
 # module load openmpi/4.1.4/gcc
 
-python src/DMD-RA.py
+# python src/DMD-RA.py
 sleep 720000
