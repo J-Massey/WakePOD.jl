@@ -14,3 +14,24 @@ Job Output Follows ...
 ===============================================================================
 Starting calculation at Fri Jul 28 14:37:10 BST 2023
 ---------------------------------------------------------------
+slurmstepd-ruby030: error: *** JOB 4377584 ON ruby030 CANCELLED AT 2023-07-28T16:16:34 ***
+==============================================================================
+Running epilogue script on ruby030.
+
+Submit time  : 2023-07-28T14:37:09
+Start time   : 2023-07-28T14:37:09
+End time     : 2023-07-28T16:16:34
+Elapsed time : 01:39:25 (Timelimit=05:00:00)
+
+Job ID: 4377584
+Cluster: i5
+User/Group: jmom1n15/mm
+State: CANCELLED (exit code 0)
+Nodes: 1
+Cores per node: 64
+CPU Utilized: 11:12:24
+CPU Efficiency: 10.57% of 4-10:02:40 core-walltime
+Job Wall-clock time: 01:39:25
+Memory Utilized: 229.06 GB
+Memory Efficiency: 101.81% of 225.00 GB
+

@@ -96,3 +96,24 @@ srun: error: ruby029: task 3: Exited with exit code 5
 [proxy:0:0@ruby016.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
 [proxy:0:0@ruby016.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
 [proxy:0:0@ruby016.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
+slurmstepd-ruby016: error: *** JOB 4378772 ON ruby016 CANCELLED AT 2023-07-28T16:15:02 ***
+==============================================================================
+Running epilogue script on ruby016.
+
+Submit time  : 2023-07-28T15:32:39
+Start time   : 2023-07-28T15:41:40
+End time     : 2023-07-28T16:15:02
+Elapsed time : 00:33:22 (Timelimit=20:00:00)
+
+Job ID: 4378772
+Cluster: i5
+User/Group: jmom1n15/mm
+State: CANCELLED (exit code 0)
+Nodes: 4
+Cores per node: 64
+CPU Utilized: 00:00:01
+CPU Efficiency: 0.00% of 5-22:21:52 core-walltime
+Job Wall-clock time: 00:33:22
+Memory Utilized: 11.47 MB
+Memory Efficiency: 0.00% of 900.00 GB
+
