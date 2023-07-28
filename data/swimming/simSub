@@ -6,7 +6,7 @@
 #SBATCH --job-name=swimming-data
 #SBATCH --time=20:00:00
 #SBATCH --output=JOB.out
-# SBATCH --exclude=ruby035,ruby036,ruby037
+#SBATCH --exclude=ruby022#,ruby036,ruby037
 # SBATCH --dependency=afterok:1908224
 
 echo "Starting calculation at $(date)"

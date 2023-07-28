@@ -1,25 +1,16 @@
-Running SLURM prolog script on gold58.cluster.local
+Running SLURM prolog script on ruby030.cluster.local
 ===============================================================================
-Job started on Thu Jul 27 08:03:26 BST 2023
-Job ID          : 4321068
+Job started on Fri Jul 28 14:37:09 BST 2023
+Job ID          : 4377584
 Job name        : DMD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
-Partition       : highmem
+Partition       : amd
 Num hosts       : 1
 Num cores       : 64
 Num of tasks    : 64
-Hosts allocated : gold58
+Hosts allocated : ruby030
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Thu Jul 27 08:03:26 BST 2023
+Starting calculation at Fri Jul 28 14:37:10 BST 2023
 ---------------------------------------------------------------
-/mainfs/scratch/jmom1n15/WakeStab.jl/src/DMD-RA.py:79: RuntimeWarning: invalid value encountered in log
-  order = np.argsort(np.imag(np.log(λ)))
-/mainfs/scratch/jmom1n15/WakeStab.jl/src/DMD-RA.py:84: RuntimeWarning: invalid value encountered in log
-  order_adj = np.argsort(-np.imag(np.log(λ̄)))
-Flucs done
-Preprocess done
-0it [00:00, ?it/s]726it [00:00, 7259.07it/s]2000it [00:00, 9996.21it/s]
-/home/jmom1n15/.conda/envs/an/lib/python3.11/site-packages/numpy/ma/core.py:2820: ComplexWarning: Casting complex values to real discards the imaginary part
-  _data = np.array(data, dtype=dtype, copy=copy,
