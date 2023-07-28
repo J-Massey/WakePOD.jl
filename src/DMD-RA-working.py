@@ -102,7 +102,7 @@ for i in range(0,min(r,4)):
 plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.pdf", dpi=700)
 plt.close()
 
-max_gain_om = omegaSpan[np.argmax(np.sqrt(gain))] 
+max_gain_om = omegaSpan[np.argmax(np.sqrt(gain[:, 0]))]
 
 Psi, Sigma, Phi = np.linalg.svd(F_tilde@np.linalg.inv((-1j*max_gain_om)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde))
 for i in range(r):
