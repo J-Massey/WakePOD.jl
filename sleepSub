@@ -2,7 +2,7 @@
 #SBATCH --ntasks=64
 #SBATCH --nodes=1
 # SBATCH --mem=243200
-#SBATCH --partition=amd
+#SBATCH --partition=highmem
 #SBATCH --job-name=DMD
 #SBATCH --time=5:00:00
 #SBATCH --output=INTERACTIVE.out
