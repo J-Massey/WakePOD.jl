@@ -1,37 +1,340 @@
-Running SLURM prolog script on ruby005.cluster.local
+Running SLURM prolog script on gold59.cluster.local
 ===============================================================================
-Job started on Tue Jul 25 15:11:41 BST 2023
-Job ID          : 4280036
+Job started on Sat Jul 29 14:51:16 BST 2023
+Job ID          : 4281104
 Job name        : SPOD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/SPODSub
-Partition       : amd
-Num hosts       : 8
-Num cores       : 512
-Num of tasks    : 512
-Hosts allocated : ruby[005,031,035-039,041]
+Partition       : highmem
+Num hosts       : 4
+Num cores       : 256
+Num of tasks    : 256
+Hosts allocated : gold[59-61,63]
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Tue Jul 25 15:11:41 BST 2023
+Starting calculation at Sat Jul 29 14:51:17 BST 2023
 ---------------------------------------------------------------
-/tmp/slurmd/job4280036/slurm_script: line 23: 13443 Killed                  python src/SPOD-stationary.py
+Flucs done
+FFT done
+Plotted
+--------------------------------------
+SPOD starts...
+--------------------------------------
+Using user specified method...
+Using default weight...
+Using user specified nDFT ...
+Using default Hamming window...
+Using default nOvlp...
+--------------------------------------
+SPOD parameters summary:
+--------------------------------------
+number of DFT points : 512
+number of blocks is  : 12
+number of overlap is : 256
+Window function      : Hamming
+Weight function      : unity
+Running method       : fast
+--------------------------------------
+Calculating temporal DFT
+--------------------------------------
+block 1 / 12 ( 1 : 512 )
+block 2 / 12 ( 257 : 768 )
+block 3 / 12 ( 513 : 1024 )
+block 4 / 12 ( 769 : 1280 )
+block 5 / 12 ( 1025 : 1536 )
+block 6 / 12 ( 1281 : 1792 )
+block 7 / 12 ( 1537 : 2048 )
+block 8 / 12 ( 1793 : 2304 )
+block 9 / 12 ( 2049 : 2560 )
+block 10 / 12 ( 2305 : 2816 )
+block 11 / 12 ( 2561 : 3072 )
+block 12 / 12 ( 2817 : 3328 )
+--------------------------------------
+Calculating SPOD
+--------------------------------------
+Frequency 1 / 257 (f = 0.000 )
+Frequency 2 / 257 (f = 0.443 )
+Frequency 3 / 257 (f = 0.886 )
+Frequency 4 / 257 (f = 1.329 )
+Frequency 5 / 257 (f = 1.771 )
+Frequency 6 / 257 (f = 2.214 )
+Frequency 7 / 257 (f = 2.657 )
+Frequency 8 / 257 (f = 3.100 )
+Frequency 9 / 257 (f = 3.543 )
+Frequency 10 / 257 (f = 3.986 )
+Frequency 11 / 257 (f = 4.428 )
+Frequency 12 / 257 (f = 4.871 )
+Frequency 13 / 257 (f = 5.314 )
+Frequency 14 / 257 (f = 5.757 )
+Frequency 15 / 257 (f = 6.200 )
+Frequency 16 / 257 (f = 6.643 )
+Frequency 17 / 257 (f = 7.085 )
+Frequency 18 / 257 (f = 7.528 )
+Frequency 19 / 257 (f = 7.971 )
+Frequency 20 / 257 (f = 8.414 )
+Frequency 21 / 257 (f = 8.857 )
+Frequency 22 / 257 (f = 9.300 )
+Frequency 23 / 257 (f = 9.742 )
+Frequency 24 / 257 (f = 10.185 )
+Frequency 25 / 257 (f = 10.628 )
+Frequency 26 / 257 (f = 11.071 )
+Frequency 27 / 257 (f = 11.514 )
+Frequency 28 / 257 (f = 11.957 )
+Frequency 29 / 257 (f = 12.399 )
+Frequency 30 / 257 (f = 12.842 )
+Frequency 31 / 257 (f = 13.285 )
+Frequency 32 / 257 (f = 13.728 )
+Frequency 33 / 257 (f = 14.171 )
+Frequency 34 / 257 (f = 14.614 )
+Frequency 35 / 257 (f = 15.057 )
+Frequency 36 / 257 (f = 15.499 )
+Frequency 37 / 257 (f = 15.942 )
+Frequency 38 / 257 (f = 16.385 )
+Frequency 39 / 257 (f = 16.828 )
+Frequency 40 / 257 (f = 17.271 )
+Frequency 41 / 257 (f = 17.714 )
+Frequency 42 / 257 (f = 18.156 )
+Frequency 43 / 257 (f = 18.599 )
+Frequency 44 / 257 (f = 19.042 )
+Frequency 45 / 257 (f = 19.485 )
+Frequency 46 / 257 (f = 19.928 )
+Frequency 47 / 257 (f = 20.371 )
+Frequency 48 / 257 (f = 20.813 )
+Frequency 49 / 257 (f = 21.256 )
+Frequency 50 / 257 (f = 21.699 )
+Frequency 51 / 257 (f = 22.142 )
+Frequency 52 / 257 (f = 22.585 )
+Frequency 53 / 257 (f = 23.028 )
+Frequency 54 / 257 (f = 23.470 )
+Frequency 55 / 257 (f = 23.913 )
+Frequency 56 / 257 (f = 24.356 )
+Frequency 57 / 257 (f = 24.799 )
+Frequency 58 / 257 (f = 25.242 )
+Frequency 59 / 257 (f = 25.685 )
+Frequency 60 / 257 (f = 26.127 )
+Frequency 61 / 257 (f = 26.570 )
+Frequency 62 / 257 (f = 27.013 )
+Frequency 63 / 257 (f = 27.456 )
+Frequency 64 / 257 (f = 27.899 )
+Frequency 65 / 257 (f = 28.342 )
+Frequency 66 / 257 (f = 28.785 )
+Frequency 67 / 257 (f = 29.227 )
+Frequency 68 / 257 (f = 29.670 )
+Frequency 69 / 257 (f = 30.113 )
+Frequency 70 / 257 (f = 30.556 )
+Frequency 71 / 257 (f = 30.999 )
+Frequency 72 / 257 (f = 31.442 )
+Frequency 73 / 257 (f = 31.884 )
+Frequency 74 / 257 (f = 32.327 )
+Frequency 75 / 257 (f = 32.770 )
+Frequency 76 / 257 (f = 33.213 )
+Frequency 77 / 257 (f = 33.656 )
+Frequency 78 / 257 (f = 34.099 )
+Frequency 79 / 257 (f = 34.541 )
+Frequency 80 / 257 (f = 34.984 )
+Frequency 81 / 257 (f = 35.427 )
+Frequency 82 / 257 (f = 35.870 )
+Frequency 83 / 257 (f = 36.313 )
+Frequency 84 / 257 (f = 36.756 )
+Frequency 85 / 257 (f = 37.198 )
+Frequency 86 / 257 (f = 37.641 )
+Frequency 87 / 257 (f = 38.084 )
+Frequency 88 / 257 (f = 38.527 )
+Frequency 89 / 257 (f = 38.970 )
+Frequency 90 / 257 (f = 39.413 )
+Frequency 91 / 257 (f = 39.855 )
+Frequency 92 / 257 (f = 40.298 )
+Frequency 93 / 257 (f = 40.741 )
+Frequency 94 / 257 (f = 41.184 )
+Frequency 95 / 257 (f = 41.627 )
+Frequency 96 / 257 (f = 42.070 )
+Frequency 97 / 257 (f = 42.512 )
+Frequency 98 / 257 (f = 42.955 )
+Frequency 99 / 257 (f = 43.398 )
+Frequency 100 / 257 (f = 43.841 )
+Frequency 101 / 257 (f = 44.284 )
+Frequency 102 / 257 (f = 44.727 )
+Frequency 103 / 257 (f = 45.170 )
+Frequency 104 / 257 (f = 45.612 )
+Frequency 105 / 257 (f = 46.055 )
+Frequency 106 / 257 (f = 46.498 )
+Frequency 107 / 257 (f = 46.941 )
+Frequency 108 / 257 (f = 47.384 )
+Frequency 109 / 257 (f = 47.827 )
+Frequency 110 / 257 (f = 48.269 )
+Frequency 111 / 257 (f = 48.712 )
+Frequency 112 / 257 (f = 49.155 )
+Frequency 113 / 257 (f = 49.598 )
+Frequency 114 / 257 (f = 50.041 )
+Frequency 115 / 257 (f = 50.484 )
+Frequency 116 / 257 (f = 50.926 )
+Frequency 117 / 257 (f = 51.369 )
+Frequency 118 / 257 (f = 51.812 )
+Frequency 119 / 257 (f = 52.255 )
+Frequency 120 / 257 (f = 52.698 )
+Frequency 121 / 257 (f = 53.141 )
+Frequency 122 / 257 (f = 53.583 )
+Frequency 123 / 257 (f = 54.026 )
+Frequency 124 / 257 (f = 54.469 )
+Frequency 125 / 257 (f = 54.912 )
+Frequency 126 / 257 (f = 55.355 )
+Frequency 127 / 257 (f = 55.798 )
+Frequency 128 / 257 (f = 56.240 )
+Frequency 129 / 257 (f = 56.683 )
+Frequency 130 / 257 (f = 57.126 )
+Frequency 131 / 257 (f = 57.569 )
+Frequency 132 / 257 (f = 58.012 )
+Frequency 133 / 257 (f = 58.455 )
+Frequency 134 / 257 (f = 58.898 )
+Frequency 135 / 257 (f = 59.340 )
+Frequency 136 / 257 (f = 59.783 )
+Frequency 137 / 257 (f = 60.226 )
+Frequency 138 / 257 (f = 60.669 )
+Frequency 139 / 257 (f = 61.112 )
+Frequency 140 / 257 (f = 61.555 )
+Frequency 141 / 257 (f = 61.997 )
+Frequency 142 / 257 (f = 62.440 )
+Frequency 143 / 257 (f = 62.883 )
+Frequency 144 / 257 (f = 63.326 )
+Frequency 145 / 257 (f = 63.769 )
+Frequency 146 / 257 (f = 64.212 )
+Frequency 147 / 257 (f = 64.654 )
+Frequency 148 / 257 (f = 65.097 )
+Frequency 149 / 257 (f = 65.540 )
+Frequency 150 / 257 (f = 65.983 )
+Frequency 151 / 257 (f = 66.426 )
+Frequency 152 / 257 (f = 66.869 )
+Frequency 153 / 257 (f = 67.311 )
+Frequency 154 / 257 (f = 67.754 )
+Frequency 155 / 257 (f = 68.197 )
+Frequency 156 / 257 (f = 68.640 )
+Frequency 157 / 257 (f = 69.083 )
+Frequency 158 / 257 (f = 69.526 )
+Frequency 159 / 257 (f = 69.968 )
+Frequency 160 / 257 (f = 70.411 )
+Frequency 161 / 257 (f = 70.854 )
+Frequency 162 / 257 (f = 71.297 )
+Frequency 163 / 257 (f = 71.740 )
+Frequency 164 / 257 (f = 72.183 )
+Frequency 165 / 257 (f = 72.626 )
+Frequency 166 / 257 (f = 73.068 )
+Frequency 167 / 257 (f = 73.511 )
+Frequency 168 / 257 (f = 73.954 )
+Frequency 169 / 257 (f = 74.397 )
+Frequency 170 / 257 (f = 74.840 )
+Frequency 171 / 257 (f = 75.283 )
+Frequency 172 / 257 (f = 75.725 )
+Frequency 173 / 257 (f = 76.168 )
+Frequency 174 / 257 (f = 76.611 )
+Frequency 175 / 257 (f = 77.054 )
+Frequency 176 / 257 (f = 77.497 )
+Frequency 177 / 257 (f = 77.940 )
+Frequency 178 / 257 (f = 78.382 )
+Frequency 179 / 257 (f = 78.825 )
+Frequency 180 / 257 (f = 79.268 )
+Frequency 181 / 257 (f = 79.711 )
+Frequency 182 / 257 (f = 80.154 )
+Frequency 183 / 257 (f = 80.597 )
+Frequency 184 / 257 (f = 81.039 )
+Frequency 185 / 257 (f = 81.482 )
+Frequency 186 / 257 (f = 81.925 )
+Frequency 187 / 257 (f = 82.368 )
+Frequency 188 / 257 (f = 82.811 )
+Frequency 189 / 257 (f = 83.254 )
+Frequency 190 / 257 (f = 83.696 )
+Frequency 191 / 257 (f = 84.139 )
+Frequency 192 / 257 (f = 84.582 )
+Frequency 193 / 257 (f = 85.025 )
+Frequency 194 / 257 (f = 85.468 )
+Frequency 195 / 257 (f = 85.911 )
+Frequency 196 / 257 (f = 86.354 )
+Frequency 197 / 257 (f = 86.796 )
+Frequency 198 / 257 (f = 87.239 )
+Frequency 199 / 257 (f = 87.682 )
+Frequency 200 / 257 (f = 88.125 )
+Frequency 201 / 257 (f = 88.568 )
+Frequency 202 / 257 (f = 89.011 )
+Frequency 203 / 257 (f = 89.453 )
+Frequency 204 / 257 (f = 89.896 )
+Frequency 205 / 257 (f = 90.339 )
+Frequency 206 / 257 (f = 90.782 )
+Frequency 207 / 257 (f = 91.225 )
+Frequency 208 / 257 (f = 91.668 )
+Frequency 209 / 257 (f = 92.110 )
+Frequency 210 / 257 (f = 92.553 )
+Frequency 211 / 257 (f = 92.996 )
+Frequency 212 / 257 (f = 93.439 )
+Frequency 213 / 257 (f = 93.882 )
+Frequency 214 / 257 (f = 94.325 )
+Frequency 215 / 257 (f = 94.767 )
+Frequency 216 / 257 (f = 95.210 )
+Frequency 217 / 257 (f = 95.653 )
+Frequency 218 / 257 (f = 96.096 )
+Frequency 219 / 257 (f = 96.539 )
+Frequency 220 / 257 (f = 96.982 )
+Frequency 221 / 257 (f = 97.424 )
+Frequency 222 / 257 (f = 97.867 )
+Frequency 223 / 257 (f = 98.310 )
+Frequency 224 / 257 (f = 98.753 )
+Frequency 225 / 257 (f = 99.196 )
+Frequency 226 / 257 (f = 99.639 )
+Frequency 227 / 257 (f = 100.082 )
+Frequency 228 / 257 (f = 100.524 )
+Frequency 229 / 257 (f = 100.967 )
+Frequency 230 / 257 (f = 101.410 )
+Frequency 231 / 257 (f = 101.853 )
+Frequency 232 / 257 (f = 102.296 )
+Frequency 233 / 257 (f = 102.739 )
+Frequency 234 / 257 (f = 103.181 )
+Frequency 235 / 257 (f = 103.624 )
+Frequency 236 / 257 (f = 104.067 )
+Frequency 237 / 257 (f = 104.510 )
+Frequency 238 / 257 (f = 104.953 )
+Frequency 239 / 257 (f = 105.396 )
+Frequency 240 / 257 (f = 105.838 )
+Frequency 241 / 257 (f = 106.281 )
+Frequency 242 / 257 (f = 106.724 )
+Frequency 243 / 257 (f = 107.167 )
+Frequency 244 / 257 (f = 107.610 )
+Frequency 245 / 257 (f = 108.053 )
+Frequency 246 / 257 (f = 108.495 )
+Frequency 247 / 257 (f = 108.938 )
+Frequency 248 / 257 (f = 109.381 )
+Frequency 249 / 257 (f = 109.824 )
+Frequency 250 / 257 (f = 110.267 )
+Frequency 251 / 257 (f = 110.710 )
+Frequency 252 / 257 (f = 111.152 )
+Frequency 253 / 257 (f = 111.595 )
+Frequency 254 / 257 (f = 112.038 )
+Frequency 255 / 257 (f = 112.481 )
+Frequency 256 / 257 (f = 112.924 )
+Frequency 257 / 257 (f = 113.367 )
+--------------------------------------
+Saving SPOD results...
+SPOD results saved to HDF5 file
+--------------------------------------
+--------------------------------------
+SPOD finished
+Memory usage: 871.81 GB
+Run time    : 23517.15 s
+--------------------------------------
 ==============================================================================
-Running epilogue script on ruby005.
+Running epilogue script on gold59.
 
-Submit time  : 2023-07-25T14:52:56
-Start time   : 2023-07-25T15:11:41
-End time     : 2023-07-25T15:14:23
-Elapsed time : 00:02:42 (Timelimit=04:00:00)
+Submit time  : 2023-07-25T17:12:38
+Start time   : 2023-07-29T14:51:16
+End time     : 2023-07-29T21:34:55
+Elapsed time : 06:43:39 (Timelimit=10:00:00)
 
-Job ID: 4280036
+Job ID: 4281104
 Cluster: i5
 User/Group: jmom1n15/mm
-State: FAILED (exit code 137)
-Nodes: 8
+State: COMPLETED (exit code 0)
+Nodes: 4
 Cores per node: 64
-CPU Utilized: 00:02:14
-CPU Efficiency: 0.16% of 23:02:24 core-walltime
-Job Wall-clock time: 00:02:42
-Memory Utilized: 229.53 GB
-Memory Efficiency: 12.75% of 1.76 TB
+CPU Utilized: 08:47:35
+CPU Efficiency: 0.51% of 71-18:14:24 core-walltime
+Job Wall-clock time: 06:43:39
+Memory Utilized: 871.83 GB
+Memory Efficiency: 14.76% of 5.77 TB
 

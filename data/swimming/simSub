@@ -19,6 +19,6 @@ source activate an
 
 python run-2d.py
 python watch_simdir.py
-python bmask.py
-python collect_save.py
+# python bmask.py
+# python collect_save.py
 
