@@ -28,7 +28,7 @@ def collect_data(fns, data_dir="./data"):
 
 
 if __name__ == "__main__":
-    data_dir = "./data"
+    data_dir = "./10k"
     root = "u"
     fn = fns(data_dir, root)
     data = collect_data(fn, data_dir)

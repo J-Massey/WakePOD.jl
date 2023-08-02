@@ -2,7 +2,7 @@
 #SBATCH --ntasks=64
 #SBATCH --nodes=1
 # SBATCH --mem=243200
-#SBATCH --partition=highmem
+#SBATCH --partition=amd
 #SBATCH --job-name=DMD
 #SBATCH --time=5:00:00
 #SBATCH --output=INTERACTIVE.out
@@ -20,5 +20,7 @@ module load conda
 source activate an
 # module load openmpi/4.1.4/gcc
 
+cd data/swimming
+python bmask.py
 # python src/DMD-RA.py
 sleep 720000

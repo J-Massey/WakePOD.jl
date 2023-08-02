@@ -1,7 +1,7 @@
 Running SLURM prolog script on gold62.cluster.local
 ===============================================================================
-Job started on Wed Aug  2 03:56:33 BST 2023
-Job ID          : 4402027
+Job started on Wed Aug  2 11:51:33 BST 2023
+Job ID          : 4405630
 Job name        : rand-RA
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/genSub
@@ -9,32 +9,11 @@ Partition       : highmem
 Num hosts       : 4
 Num cores       : 256
 Num of tasks    : 256
-Hosts allocated : gold[62-63,65-66]
+Hosts allocated : gold[62-65]
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Wed Aug  2 03:56:33 BST 2023
+Starting calculation at Wed Aug  2 11:51:34 BST 2023
 ---------------------------------------------------------------
 Flucs done
   0%|          | 0/40 [00:00<?, ?it/s]/home/jmom1n15/.conda/envs/an/lib/python3.11/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:394: SparseEfficiencyWarning: splu converted its input to CSC format
   warn('splu converted its input to CSC format', SparseEfficiencyWarning)
-/tmp/slurmd/job4402027/slurm_script: line 22: 109298 Killed                  python src/RAND-RA.py
-==============================================================================
-Running epilogue script on gold62.
-
-Submit time  : 2023-08-01T15:21:36
-Start time   : 2023-08-02T03:56:33
-End time     : 2023-08-02T06:10:48
-Elapsed time : 02:14:15 (Timelimit=20:00:00)
-
-Job ID: 4402027
-Cluster: i5
-User/Group: jmom1n15/mm
-State: FAILED (exit code 137)
-Nodes: 4
-Cores per node: 64
-CPU Utilized: 1-16:44:26
-CPU Efficiency: 7.11% of 23-20:48:00 core-walltime
-Job Wall-clock time: 02:14:15
-Memory Utilized: 1.42 TB
-Memory Efficiency: 24.67% of 5.77 TB
-

@@ -13,20 +13,20 @@ def bmask():
         b = np.load(os.path.join("./data", fnb))
         bmask = np.where(b <= 1, False, True)
         u = np.where(bmask, u, 0)
-        np.save(os.path.join("./data", f"u_{idx}"), u)
+        np.save(os.path.join("./10k", f"u_{idx}"), u)
         v = np.where(bmask, v, 0)
-        np.save(os.path.join("./data", f"v_{idx}"), v)
+        np.save(os.path.join("./10k", f"v_{idx}"), v)
         p = np.where(bmask, p, 0)
-        np.save(os.path.join("./data", f"p_{idx}"), p)
+        np.save(os.path.join("./10k", f"p_{idx}"), p)
         # Now remove the files
-        print(f"Removing {fnu}, {fnv}, {fnb}")
-        try:
-            os.remove(os.path.join("./data", fnu))
-            os.remove(os.path.join("./data", fnv))
-            os.remove(os.path.join("./data", fnp))
-            os.remove(os.path.join("./data", fnb))
-        except FileNotFoundError:
-            pass
+        # print(f"Removing {fnu}, {fnv}, {fnb}")
+        # try:
+        #     os.remove(os.path.join("./data", fnu))
+        #     os.remove(os.path.join("./data", fnv))
+        #     os.remove(os.path.join("./data", fnp))
+        #     os.remove(os.path.join("./data", fnb))
+        # except FileNotFoundError:
+        #     pass
 
 
 def fns():

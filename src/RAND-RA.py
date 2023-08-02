@@ -16,7 +16,7 @@ plt.rcParams["font.size"] = "10.5"
 def load_and_process_data(filepath):
     data = np.load(filepath)
     data = np.einsum("ijk -> kji", data)
-    return data[::2, ::2, :]
+    return data[::4, ::4, :]
 
 # Define the slicing pattern as a variable for clarity
 slice_pattern = (slice(None, None, 2), slice(None, None, 2), slice(None, None, 4))
