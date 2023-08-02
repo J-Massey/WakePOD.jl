@@ -14,7 +14,7 @@ plt.rcParams["image.cmap"] = "gist_earth"
 def load_and_process_data(filepath):
     data = np.load(filepath)
     data = np.einsum("ijk -> kji", data)
-    return data[::2, ::2, ::4]
+    return data[::2, ::2, :]
 
 
 u = load_and_process_data("data/stationary/10k/u.npy")
@@ -30,7 +30,7 @@ dt = T / nt
 pxs = np.linspace(*xlims, nx)
 pys = np.linspace(*ylims, ny)
 
-# Compute fluctuations in a vectorized manner
+# Compute fluctuations
 u_mean = u.mean(axis=2, keepdims=True)
 v_mean = v.mean(axis=2, keepdims=True)
 p_mean = p.mean(axis=2, keepdims=True)
@@ -40,10 +40,10 @@ p_flucs = p - p_mean
 
 flat_flucs = np.concatenate([u_flucs, v_flucs, p_flucs], axis=0).reshape(3 * nx * ny, nt)
 
-print("Preprocess done")
-
 fluc1 = flat_flucs[:, :-1]
 fluc2 = flat_flucs[:, 1:]
+
+print("Preprocess done")
 
 def normalise_basis(W: np.ndarray):
     # Normalization with respect to identity matrix Q
@@ -57,13 +57,14 @@ rs = [2] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): 
 Ub,Sigmab,VTb = svd(fluc2,full_matrices=False)
 Uf, Sigmaf, VTf = svd(fluc1, full_matrices=False)
 
-r=200
+r=nt
 # for r in rs:
 # Sigma_plot(Sigma)
 U_r = Ub[:,:r]
 Sigmar = np.diag(Sigmab[:r])
 VT_r = VTb[:r,:]
 Atildeb = np.linalg.solve(Sigmar.T,(U_r.T @ fluc1 @ VT_r.T).T).T
+
 
 U_r = Uf[:, :r]
 S_r = np.diag(Sigmaf[:r])

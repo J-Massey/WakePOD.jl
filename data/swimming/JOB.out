@@ -1,7 +1,7 @@
-Running SLURM prolog script on ruby018.cluster.local
+Running SLURM prolog script on ruby003.cluster.local
 ===============================================================================
-Job started on Tue Aug  1 15:01:39 BST 2023
-Job ID          : 4401449
+Job started on Tue Aug  1 21:34:42 BST 2023
+Job ID          : 4403521
 Job name        : swimming-data
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming/simSub
@@ -9,10 +9,10 @@ Partition       : amd
 Num hosts       : 4
 Num cores       : 256
 Num of tasks    : 256
-Hosts allocated : ruby[018,022,025,028]
+Hosts allocated : ruby[003,022,025,028]
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Tue Aug  1 15:01:40 BST 2023
+Starting calculation at Tue Aug  1 21:34:42 BST 2023
 ---------------------------------------------------------------
 make: Entering directory `/mainfs/home/jmom1n15/Lotus/solver/src/geom'
 make: `libgeom.a' is up to date.
@@ -21,78 +21,79 @@ make: Entering directory `/mainfs/home/jmom1n15/Lotus/solver/src/oop'
 make: `libfluid.a' is up to date.
 make: Leaving directory `/mainfs/home/jmom1n15/Lotus/solver/src/oop'
 mpif90 -cpp -DMPION  -Ofast -funroll-loops --param max-unroll-times=4  -I/home/jmom1n15/Lotus/solver/src/oop -I/home/jmom1n15/Lotus/solver/src/geom/geom_lib_include -c lotus.f90
-/home/jmom1n15/.conda/envs/an/bin/mpif90: line 392: x86_64-conda_cos6-linux-gnu-gfortran: command not found
-make: *** [lotus.o] Error 127
-[proxy:0:2@ruby025.cluster.local] HYDU_sock_connect (utils/sock/sock.c:145): unable to connect from "ruby025.cluster.local" to "ruby018.cluster.local" (Connection refused)
-[proxy:0:2@ruby025.cluster.local] main (pm/pmiserv/pmip.c:183): unable to connect to server ruby018.cluster.local at port 46164 (check for firewalls!)
-[proxy:0:1@ruby022.cluster.local] HYDU_sock_connect (utils/sock/sock.c:145): unable to connect from "ruby022.cluster.local" to "ruby018.cluster.local" (Connection refused)
-[proxy:0:1@ruby022.cluster.local] main (pm/pmiserv/pmip.c:183): unable to connect to server ruby018.cluster.local at port 46164 (check for firewalls!)
-[proxy:0:3@ruby028.cluster.local] HYDU_sock_connect (utils/sock/sock.c:145): unable to connect from "ruby028.cluster.local" to "ruby018.cluster.local" (Connection refused)
-[proxy:0:3@ruby028.cluster.local] main (pm/pmiserv/pmip.c:183): unable to connect to server ruby018.cluster.local at port 46164 (check for firewalls!)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-[proxy:0:0@ruby018.cluster.local] HYDU_create_process (utils/launch/launch.c:74): execvp error on file ./lotus (No such file or directory)
-srun: error: ruby028: task 3: Exited with exit code 5
-srun: error: ruby022: task 1: Exited with exit code 5
-srun: error: ruby025: task 2: Exited with exit code 5
+mpif90 -cpp -DMPION  -Ofast -funroll-loops --param max-unroll-times=4  -o lotus lotus.o -L/home/jmom1n15/Lotus/solver/src/oop/. -L/home/jmom1n15/Lotus/solver/src/geom/. -lfluid -lgeom
+ Setting up the grid, body and fluid
+ -----------------------------------
+composite(4096.0)=4096
+  products :1*2**12
+composite(4096.0)=4096
+  products :1*2**12
+composite(.0)=1
+ Stretched grid sections:
+  negative: r= 0.4%, h_max=22.8
+  positive: r= 0.4%, h_max=16.9
+ grid symmetry:  F
+ Stretched grid sections:
+  negative: r= 0.6%, h_max=33.7
+  positive: r= 0.6%, h_max=33.7
+ grid symmetry:  T
+ Starting time update loop
+ -----------------------------------
+Time:          0.000
+Time:          1.000
+Time:          2.000
+Time:          3.000
+Time:          4.000
+Time:          5.000
+Time:          6.000
+Time:          7.000
+Time:          8.000
+Time:          9.000
+Time:         10.000
+Time:         11.000
+Time:         12.000
+Time:         13.000
+Time:         14.000
+Time:         15.000
+Time:         16.000
+Time:         17.000
+Time:         18.000
+Time:         19.000
+Time:         20.000
+ Loop complete: writing restart files and exiting
+ -----------------------------------
+Number of proccessors :256
+Run folder            :/mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming/lotus-data
+No read folder
+Folder /mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming/lotus-data exists!
+Moving contents to trash
+Setting up in /mainfs/scratch/jmom1n15/WakeStab.jl/data/swimming/lotus-data
+No postprocessing set up
+No stopping criteria, the simulation will run its course
+Making executable 
+Finished executable 
+Running executable 
+Run all python files for postprocessing
+Popping back up
+Watching directory: ./lotus-data
+Total files deleted: 1434626
+==============================================================================
+Running epilogue script on ruby003.
+
+Submit time  : 2023-08-01T21:26:09
+Start time   : 2023-08-01T21:34:41
+End time     : 2023-08-02T06:05:18
+Elapsed time : 08:30:37 (Timelimit=20:00:00)
+
+Job ID: 4403521
+Cluster: i5
+User/Group: jmom1n15/mm
+State: COMPLETED (exit code 0)
+Nodes: 4
+Cores per node: 64
+CPU Utilized: 12-20:38:28
+CPU Efficiency: 14.17% of 90-18:37:52 core-walltime
+Job Wall-clock time: 08:30:37
+Memory Utilized: 17.03 GB (estimated maximum)
+Memory Efficiency: 1.89% of 900.00 GB (3.52 GB/core)
+
