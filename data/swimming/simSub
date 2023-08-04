@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --ntasks=256
-#SBATCH --nodes=4
-#SBATCH --partition=amd
+#SBATCH --ntasks=64
+#SBATCH --nodes=1
+#SBATCH --partition=highmem
 #SBATCH --job-name=swimming-data
 #SBATCH --time=20:00:00
 #SBATCH --output=JOB.out
@@ -17,8 +17,9 @@ module load openmpi/4.0.5/amd
 module load conda
 source activate an
 
-python run-2d.py
-python watch_simdir.py
+# python run-2d.py
+# python watch_simdir.py
 # python bmask.py
-# python collect_save.py
+python collect_save.py
+# sleep 7200000
 
