@@ -16,7 +16,7 @@ fp = "data/swimming/10k"
 def load_and_process_data(filepath):
     data = np.load(filepath)
     data = np.einsum("ijk -> kji", data)
-    return data[::2, ::2, :]
+    return data # [::2, ::2, :]
 
 
 u = load_and_process_data(f"{fp}/u.npy")
@@ -36,12 +36,9 @@ def wakify(arr, pxs):
     mask = pxs > 1
     return arr[mask, :, :]
 
-uo = u
-vo = v
-po = p
-u = wakify(uo, pxs)
-v = wakify(vo, pxs)
-p = wakify(po, pxs)
+u = wakify(u, pxs)
+v = wakify(v, pxs)
+p = wakify(p, pxs)
 
 xlims, ylims = (1, 2), (-0.35, 0.35)
 nx, ny, nt = v.shape
@@ -64,18 +61,15 @@ fluc2 = flat_flucs[:, 1:]
 
 print("Preprocess done")
 
-def normalise_basis(W: np.ndarray):
-    # Normalization with respect to identity matrix Q
-    W_norms = np.linalg.norm(W, axis=0)
-    W_normalised = W / W_norms
-    return W_normalised
-
-# def fbDMD(fluc1,fluc2,k):
-# backwards
 Ub,Sigmab,VTb = svd(fluc2,full_matrices=False)
 Uf, Sigmaf, VTf = svd(fluc1, full_matrices=False)
 
-rs = [2, 10, nt-1] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
+print("SVDone")
+
+# def fbDMD(fluc1,fluc2,k):
+# backwards
+
+rs = [2, 4, 10, 20, nt-1] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
 for r in rs:
 # Sigma_plot(Sigma)
     U_r = Ub[:,:r]
@@ -92,7 +86,6 @@ for r in rs:
     # Find the linear operator
     A_tilde = 1/2*(Atildef + np.linalg.inv(Atildeb))
     rho, W = np.linalg.eig(A_tilde)
-    W = normalise_basis(W)
 
     # Find the eigenfunction from spectral expansion
     Lambda = np.log(rho)/dt
@@ -100,6 +93,7 @@ for r in rs:
     # Find the DMD modes
     V_r = np.dot(np.dot(fluc2, VT_r.T), np.dot(np.linalg.inv(S_r), W))
 
+    # Find the hermatian adjoint of the 
     V_r_star_Q = V_r.conj().T
     V_r_star_Q_V_r = np.dot(V_r_star_Q, V_r)
     # Cholesky factorization
@@ -118,7 +112,7 @@ for r in rs:
     # ax.set_xlim(0, 10)
     for i in range(0,min(r,4)):
         ax.loglog(omegaSpan, np.sqrt(gain[:, i]))
-    plt.savefig(f"swimming/figures/opt_gain_DMD_{r}.png", dpi=700)
+    plt.savefig(f"stationary/figures/opt_gain_DMD_{r}.png", dpi=700)
     plt.close()
 
     max_gain_om = omegaSpan[np.argmax(np.sqrt(gain[:, 0]))]
@@ -149,7 +143,7 @@ for r in rs:
     ax.set_aspect(1)
     ax.set(xlabel=r"$x$", ylabel=r"$y$")
 
-    plt.savefig(f"swimming/figures/forcing{r}.png", dpi=700)
+    plt.savefig(f"stationary/figures/forcing{r}.png", dpi=700)
     plt.close()
 
     response = (V_r @ np.linalg.inv(F_tilde)@Phi.T).reshape(3, nx, ny, r)
@@ -171,6 +165,6 @@ for r in rs:
     ax.set_aspect(1)
     ax.set(xlabel=r"$x$", ylabel=r"$y$")
 
-    plt.savefig(f"swimming/figures/response{r}.png", dpi=700)
+    plt.savefig(f"stationary/figures/response{r}.png", dpi=700)
     plt.close()
 
