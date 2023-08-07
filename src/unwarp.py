@@ -10,13 +10,37 @@ plt.style.use(["science"])
 plt.rcParams["font.size"] = "10.5"
 plt.rcParams["image.cmap"] = "gist_earth"
 
+
+def plot_flows(qi, fn, _cmap, lim):
+    # Test plot
+    fig, ax = plt.subplots(figsize=(5, 3))
+    levels = np.linspace(lim[0], lim[1], 44)
+    _cmap = sns.color_palette(_cmap, as_cmap=True)
+    cs = ax.contourf(
+        pxs,
+        pys,
+        qi,
+        levels=levels,
+        vmin=lim[0],
+        vmax=lim[1],
+        # norm=norm,
+        cmap=_cmap,
+        extend="both",
+        # alpha=0.7,
+    )
+    ax.set_aspect(1)
+    # ax.set_title(f"$\omega={frequencies_bsort[oms]:.2f},St={frequencies_bsort[oms]/(2*np.pi):.2f}$")
+    # ax.plot(pxs, fwarp(pxs), c='k')
+    plt.savefig(f"./swimming/figures/{fn}.png", dpi=700)
+    plt.close()
+
 case = "swimming"
 fp = f"data/{case}/10k"
 
 def load_and_process_data(filepath):
     data = np.load(filepath)
     data = np.einsum("ijk -> kji", data)
-    return data # [::2, ::2, :]
+    return data[::2, ::2, :]
 
 
 u = load_and_process_data(f"{fp}/u.npy")
@@ -28,31 +52,80 @@ nx, ny, nt = v.shape
 
 T = 14
 dt = T / nt
+t = np.linspace(0, T, nt)
 
 pxs = np.linspace(*xlims, nx)
 pys = np.linspace(*ylims, ny)
 
-def wakify(arr, pxs):
-    mask = pxs > 1
+
+def bodify(arr, pxs):
+    mask = ((pxs > 0) & (pxs < 1))
     return arr[mask, :, :]
 
-u = wakify(u, pxs)
-v = wakify(v, pxs)
-p = wakify(p, pxs)
 
-xlims, ylims = (1, 2), (-0.35, 0.35)
-nx, ny, nt = v.shape
+u = bodify(u, pxs)
+v = bodify(v, pxs)
+p = bodify(p, pxs)
+
+nx, ny, nt = u.shape
+xlims, ylims = (0, 1), (-0.35, 0.35)
 pxs = np.linspace(*xlims, nx)
 pys = np.linspace(*ylims, ny)
 
 
-# Compute fluctuations
-u_mean = u.mean(axis=2, keepdims=True)
-v_mean = v.mean(axis=2, keepdims=True)
-p_mean = p.mean(axis=2, keepdims=True)
-u_flucs = u - u_mean
-v_flucs = v - v_mean
-p_flucs = p - p_mean
+def fwarp(t: float, pxs: np.ndarray):
+    return -0.5*(0.28 * pxs**2 - 0.13 * pxs + 0.05) * np.sin(2*np.pi*(t - (1.42* pxs)))
+
+
+def unwarp_velocity_field(qi, ts, pxs):
+    dy = (- ylims[0] + ylims[1])/ny
+    q_warped = np.full(qi.shape, np.nan)
+    for idt, t in enumerate(ts):
+        # Calculate the shifts for each x-coordinate
+        fw = fwarp(t, pxs)
+        shifts = np.round(fw/dy).astype(int)
+
+        # Apply the shifts to the velocity field
+        for i in range(qi.shape[0]):
+            shift = shifts[i]
+            if shift >= 0:
+                q_warped[i, shift:, idt] = qi[i, :qi.shape[1]-shift, idt]
+            else:
+                shift = -shift
+                q_warped[i, :-shift, idt] = qi[i, shift:, idt]
+    
+    return q_warped
+
+
+u_unwarped = unwarp_velocity_field(u, t, pxs)
+v_unwarped = unwarp_velocity_field(v, t, pxs)
+p_unwarped = unwarp_velocity_field(p, t, pxs)
+
+for idt in range(200):
+    plot_flows(v_unwarped[:,:,idt].T, f"warp-gif/{idt}", "seismic", [-0.5, 0.5])
+
+
+def clipped_field(arr, pys):
+    mask = ((pys > -0.25) & (pys < 0.25))
+    return arr[:, mask, :]
+
+u_unwarped = clipped_field(u_unwarped, pys)
+v_unwarped = clipped_field(v_unwarped, pys)
+p_unwarped = clipped_field(p_unwarped, pys)
+
+nx, ny, nt = u_unwarped.shape
+xlims, ylims = (0, 1), (-0.25, 0.25)
+pxs = np.linspace(*xlims, nx)
+pys = np.linspace(*ylims, ny)
+
+
+# Compute fluctuations 
+u_mean = u_unwarped.mean(axis=2, keepdims=True)
+v_mean = v_unwarped.mean(axis=2, keepdims=True)
+p_mean = p_unwarped.mean(axis=2, keepdims=True)
+u_flucs = u_unwarped - u_mean
+v_flucs = v_unwarped - v_mean
+p_flucs = p_unwarped - p_mean
 
 flat_flucs = np.concatenate([u_flucs, v_flucs, p_flucs], axis=0).reshape(3 * nx * ny, nt)
 
@@ -65,9 +138,6 @@ Ub,Sigmab,VTb = svd(fluc2,full_matrices=False)
 Uf, Sigmaf, VTf = svd(fluc1, full_matrices=False)
 
 print("SVDone")
-
-# def fbDMD(fluc1,fluc2,k):
-# backwards
 
 rs = [2, 4, 10, 20, nt-2] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
 for r in rs:
@@ -167,4 +237,3 @@ for r in rs:
 
     plt.savefig(f"{case}/figures/response{r}.png", dpi=700)
     plt.close()
-

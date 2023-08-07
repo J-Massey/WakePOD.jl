@@ -14,3 +14,23 @@ Job Output Follows ...
 ===============================================================================
 Starting calculation at Mon Aug  7 09:41:47 BST 2023
 ---------------------------------------------------------------
+==============================================================================
+Running epilogue script on gold63.
+
+Submit time  : 2023-08-07T09:34:23
+Start time   : 2023-08-07T09:41:46
+End time     : 2023-08-07T14:33:44
+Elapsed time : 04:51:58 (Timelimit=20:00:00)
+
+Job ID: 4431283
+Cluster: i5
+User/Group: jmom1n15/mm
+State: FAILED (exit code 137)
+Nodes: 2
+Cores per node: 64
+CPU Utilized: 6-17:35:07
+CPU Efficiency: 25.94% of 25-22:51:44 core-walltime
+Job Wall-clock time: 04:51:58
+Memory Utilized: 1.43 TB
+Memory Efficiency: 49.52% of 2.88 TB
+
