@@ -45,4 +45,4 @@ def main(nm):
 
 
 if __name__ == "__main__":
-    main("thicc.gif")
+    main("u_unwarped.gif")

@@ -57,7 +57,6 @@ nx, ny, nt = v.shape
 pxs = np.linspace(*xlims, nx)
 pys = np.linspace(*ylims, ny)
 
-
 # Compute fluctuations
 u_mean = u.mean(axis=2, keepdims=True)
 v_mean = v.mean(axis=2, keepdims=True)
@@ -101,7 +100,7 @@ plot_flows(p_mean.T[0], "p", "seismic", [-0.1, 0.1])
 print("Plotted")
 
 
-spod(flatflucs,dt,"swimming/10k")
+spod(flatflucs,dt,"swimming/10k", method='fast')
 
 SPOD_LPf  = h5py.File(os.path.join('swimming/10k','SPOD_LPf.h5'),'r') # load data from h5 format
 

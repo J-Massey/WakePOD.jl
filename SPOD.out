@@ -14,3 +14,24 @@ Job Output Follows ...
 ===============================================================================
 Starting calculation at Mon Aug  7 15:25:52 BST 2023
 ---------------------------------------------------------------
+slurmstepd-gold63: error: *** JOB 4434280 ON gold63 CANCELLED AT 2023-08-08T01:26:09 DUE TO TIME LIMIT ***
+==============================================================================
+Running epilogue script on gold63.
+
+Submit time  : 2023-08-07T15:25:21
+Start time   : 2023-08-07T15:25:51
+End time     : 2023-08-08T01:26:09
+Elapsed time : 10:00:18 (Timelimit=10:00:00)
+
+Job ID: 4434280
+Cluster: i5
+User/Group: jmom1n15/mm
+State: TIMEOUT (exit code 0)
+Nodes: 2
+Cores per node: 64
+CPU Utilized: 00:00:02
+CPU Efficiency: 0.00% of 53-08:38:24 core-walltime
+Job Wall-clock time: 10:00:18
+Memory Utilized: 709.98 GB
+Memory Efficiency: 24.04% of 2.88 TB
+

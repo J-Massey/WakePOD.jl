@@ -2,6 +2,7 @@ import numpy as np
 from scipy.linalg import svd, cholesky
 from tqdm import tqdm
 
+from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 import seaborn as sns
 import scienceplots
@@ -169,7 +170,7 @@ for r in rs:
     # Cholesky factorization
     F_tilde = cholesky(V_r_star_Q_V_r)
 
-    omegaSpan = np.linspace(1, 500, 1000)
+    omegaSpan = np.linspace(0, 1000, 2000)
     gain = np.empty((omegaSpan.size, Lambda.size))
     for idx, omega in tqdm(enumerate(omegaSpan)):
         R = np.linalg.svd(F_tilde@np.linalg.inv((-1j*omega)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde),
@@ -185,9 +186,16 @@ for r in rs:
     plt.savefig(f"{case}/figures/opt_gain_DMD_{r}.png", dpi=700)
     plt.close()
 
-    max_gain_om = omegaSpan[np.argmax(np.sqrt(gain[:, 0]))]
 
-    Psi, Sigma, Phi = np.linalg.svd(F_tilde@np.linalg.inv((-1j*max_gain_om)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde))
+# Find peaks in the gain data
+peak_indices, _ = find_peaks(gain[:,0])
+
+# Extract the omega values corresponding to these peaks
+peak_omegas = omegaSpan[peak_indices]
+
+for omega in peak_omegas:
+
+    Psi, Sigma, Phi = np.linalg.svd(F_tilde@np.linalg.inv((-1j*omega)*np.eye(Lambda.shape[0])-np.diag(Lambda))@np.linalg.inv(F_tilde))
     for i in range(r):
         Psi[:, i] /= np.sqrt(np.dot(Psi[:, i].T, Psi[:, i]))
         Phi[:, i] /= np.sqrt(np.dot(Phi[:, i].T, Phi[:, i]))
@@ -211,9 +219,9 @@ for r in rs:
                             )
 
     ax.set_aspect(1)
-    ax.set(xlabel=r"$x$", ylabel=r"$y$")
+    ax.set(xlabel=r"$x$", ylabel=r"$y$", title=f"$f^*={omega/(2*np.pi):.2f}$")
 
-    plt.savefig(f"{case}/figures/forcing{r}.png", dpi=700)
+    plt.savefig(f"{case}/figures/body/forcing_om_{omega/(2*np.pi):.0f}.png", dpi=700)
     plt.close()
 
     response = (V_r @ np.linalg.inv(F_tilde)@Phi.T).reshape(3, nx, ny, r)
@@ -233,7 +241,7 @@ for r in rs:
                             )
 
     ax.set_aspect(1)
-    ax.set(xlabel=r"$x$", ylabel=r"$y$")
+    ax.set(xlabel=r"$x$", ylabel=r"$y$", title=f"$f^*={omega/(2*np.pi):.2f}$")
 
-    plt.savefig(f"{case}/figures/response{r}.png", dpi=700)
+    plt.savefig(f"{case}/figures/body/response_om_{omega/(2*np.pi):.0f}.png", dpi=700)
     plt.close()
