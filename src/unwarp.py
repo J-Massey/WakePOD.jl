@@ -140,7 +140,7 @@ Uf, Sigmaf, VTf = svd(fluc1, full_matrices=False)
 
 print("SVDone")
 
-rs = [2, 4, 10, 20, nt-2] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
+rs = [nt-3, nt-2, nt-1] # input("Enter the number of DMD modes you'd like to retain (e.g., 2): ")
 for r in rs:
 # Sigma_plot(Sigma)
     U_r = Ub[:,:r]

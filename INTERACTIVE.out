@@ -1,7 +1,7 @@
 Running SLURM prolog script on gold60.cluster.local
 ===============================================================================
-Job started on Tue Aug  8 08:36:09 BST 2023
-Job ID          : 4441641
+Job started on Wed Aug  9 08:18:18 BST 2023
+Job ID          : 4459340
 Job name        : DMD
 WorkDir         : /mainfs/scratch/jmom1n15/WakeStab.jl
 Command         : /mainfs/scratch/jmom1n15/WakeStab.jl/sleepSub
@@ -12,5 +12,5 @@ Num of tasks    : 64
 Hosts allocated : gold60
 Job Output Follows ...
 ===============================================================================
-Starting calculation at Tue Aug  8 08:36:09 BST 2023
+Starting calculation at Wed Aug  9 08:18:18 BST 2023
 ---------------------------------------------------------------
